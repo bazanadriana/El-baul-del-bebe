@@ -14,8 +14,7 @@ export default function Catalogo() {
   ];
 
   return (
-    <section id="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
-      {/* Watermark background (inside this section only) */}
+    <section id="catalogo" className="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
@@ -24,7 +23,7 @@ export default function Catalogo() {
           backgroundRepeat: "no-repeat",
           backgroundPosition: "right -18px top -18px",
           backgroundSize: "min(78vmin, 600px)",
-          opacity: 0.10,
+          opacity: 0.1,
         }}
       />
 

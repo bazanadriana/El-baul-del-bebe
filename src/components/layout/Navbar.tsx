@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import Container from "./Container";
 import LogoElBaul from "../../assets/logo-elbaul.jpg";
@@ -7,10 +7,16 @@ import { scrollToId } from "../../lib/scroll";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   const nav = [
-    { target: "catalogo",  label: "Catálogo" },
+    { target: "catalogo", label: "Catálogo" },
     { target: "visitanos", label: "Visítanos" },
-    { target: "contacto",  label: "Contáctanos" },
+    { target: "contacto", label: "Contáctanos" },
   ];
 
   const pill =
@@ -22,12 +28,13 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 isolate bg-white/90 supports-[backdrop-filter]:bg-white/70 backdrop-blur border-b border-brand-200 relative after:content-[''] after:absolute after:inset-x-0 after:-bottom-px after:h-1 after:bg-gradient-to-r after:from-violet-600 after:to-brand-500">
       <Container>
-      <div className="flex h-14 md:h-16 items-center justify-between">
-          {/* Brand → button to top section */}
+        <div className="flex h-14 md:h-16 items-center justify-between">
+          {/* Brand → scroll to top section */}
           <button
             type="button"
             onClick={() => scrollToId("inicio")}
             className="group flex items-center gap-2 font-extrabold tracking-tight"
+            aria-label="Ir al inicio"
           >
             <img
               src={LogoElBaul}
