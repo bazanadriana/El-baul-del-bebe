@@ -13,7 +13,7 @@ export default function Visitanos() {
   const mapsDirections = `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}`;
 
   return (
-    <section id="visitanos" className="relative overflow-hidden bg-white py-16 sm:py-20">
+    <section id="visitanos" className="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
       {/* Watermark background */}
       <div
         aria-hidden

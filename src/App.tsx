@@ -13,7 +13,7 @@ export default function App() {
       <Navbar />
 
       {/* Keep content clear of the sticky navbar (h-16) */}
-      <main className="relative z-[2] pt-16">
+      <main className="relative z-[2]">
         <Hero />
         <Catalogo />
         <Features />

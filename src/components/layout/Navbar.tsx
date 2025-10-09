@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.tsx (or Navibar.tsx)
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import Container from "./Container";
@@ -23,7 +22,7 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 isolate bg-white/90 supports-[backdrop-filter]:bg-white/70 backdrop-blur border-b border-brand-200 relative after:content-[''] after:absolute after:inset-x-0 after:-bottom-px after:h-1 after:bg-gradient-to-r after:from-violet-600 after:to-brand-500">
       <Container>
-        <div className="flex h-16 items-center justify-between">
+      <div className="flex h-14 md:h-16 items-center justify-between">
           {/* Brand → button to top section */}
           <button
             type="button"

@@ -83,7 +83,7 @@ function TileLink({ t }: { t: Tile }) {
 
 export default function Contacto() {
   return (
-    <section id="contacto" className="relative bg-transparent py-20 sm:py-24">
+    <section id="contacto" className="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
       <Container>
         <SectionTitle
           kicker="Contáctanos"

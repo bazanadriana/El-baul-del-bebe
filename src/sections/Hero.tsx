@@ -84,13 +84,12 @@ export default function Hero() {
   }, []);
 
   return (
-    <section
-      id="inicio"
-      className="relative overflow-hidden bg-gradient-to-b from-white to-white"
+    <section id="inicio"
+    className="relative overflow-hidden bg-gradient-to-b from-brand-50 to-white scroll-mt-14 md:scroll-mt-16"
       aria-label="Destacados"
     >
       <Container>
-        <div className="grid items-center gap-10 py-16 md:grid-cols-2 md:py-24">
+      <div className="grid items-center gap-10 pt-8 pb-16 md:grid-cols-2 md:pt-14 md:pb-24">
           {/* Left column */}
           <div>
             <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold tracking-wider text-white">

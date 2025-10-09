@@ -13,7 +13,7 @@ export default function Catalogo() {
   ];
 
   return (
-    <section id="catalogo" className="relative bg-white py-16 sm:py-20">
+    <section id="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
       {/* Watermark background (inside this section only) */}
       <div
         aria-hidden
