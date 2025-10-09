@@ -59,17 +59,15 @@ npm run build
 # Preview the production build
 npm run preview
 
----
 
-##  👩‍💻 Author
+👩‍💻 Author
 
 Adriana Bazan
 Full-stack developer passionate about web design, accessibility, and user experience.
 🌐 GitHub @bazanadriana
 
----
 
-## 📜 License
+📜 License
 
 This project is licensed under the MIT License.
 You are free to use, modify, and share it with attribution.
