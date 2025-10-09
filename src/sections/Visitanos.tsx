@@ -1,7 +1,7 @@
+// src/sections/Visitanos.tsx
 import { Clock, MapPin, Info, Map, Earth } from "lucide-react";
 import Container from "../components/layout/Container";
 import SectionTitle from "../components/common/SectionTitle";
-import LogoElBaul from "../assets/logo-elbaul.jpg";
 import Storefront from "../assets/fachada-elbaul.png";
 import { pillAqua } from "../styles/cta";
 
@@ -14,17 +14,7 @@ export default function Visitanos() {
 
   return (
     <section id="visitanos" className="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage: `url(${LogoElBaul})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right -18px top -18px",
-          backgroundSize: "min(78vmin, 600px)",
-          opacity: 0.1,
-        }}
-      />
+      {/* removed background logo layer that caused watermark */}
 
       <Container>
         <SectionTitle
@@ -84,7 +74,7 @@ export default function Visitanos() {
             </div>
           </div>
 
-          {/* Right: Storefront photo (replaces map) */}
+          {/* Right: Storefront photo */}
           <div className="card overflow-hidden">
             <img
               src={Storefront}
