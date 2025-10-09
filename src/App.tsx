@@ -9,11 +9,8 @@ import Contacto from "./sections/Contacto";
 
 export default function App() {
   return (
-    // Remove the site-wide mint tint:
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-brand-50 pb-[env(safe-area-inset-bottom)]">
       <Navbar />
-
-      {/* Keep content clear of the sticky navbar (h-16) */}
       <main className="relative z-[2] pt-16">
         <Hero />
         <Catalogo />
@@ -21,7 +18,6 @@ export default function App() {
         <Visitanos />
         <Contacto />
       </main>
-
       <Footer />
     </div>
   );

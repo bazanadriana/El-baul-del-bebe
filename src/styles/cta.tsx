@@ -11,9 +11,9 @@ export const pillOutline =
   "focus:outline-none focus-visible:ring-4 focus-visible:ring-violet-300/40";
 
 
-// NEW: soft-aqua pill (like your screenshot)
-export const pillAqua =
+  export const pillAqua =
   "inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-bold " +
+  "min-h-[44px] min-w-[44px] " +       
   "bg-brand-100 text-brand-700 border border-brand-300 " +
   "shadow-sm hover:bg-brand-100/90 hover:border-brand-400 " +
   "focus:outline-none focus-visible:ring-4 focus-visible:ring-brand-300/40";
