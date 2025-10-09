@@ -14,7 +14,6 @@ export default function Visitanos() {
 
   return (
     <section id="visitanos" className="relative bg-white py-16 sm:py-20 scroll-mt-14 md:scroll-mt-16">
-      {/* Watermark background */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
