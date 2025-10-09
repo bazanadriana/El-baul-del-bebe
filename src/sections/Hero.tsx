@@ -85,7 +85,7 @@ export default function Hero() {
 
   return (
     <section id="inicio"
-    className="relative overflow-hidden bg-gradient-to-b from-brand-50 to-white scroll-mt-14 md:scroll-mt-16"
+    className="relative overflow-hidden bg-white scroll-mt-14 md:scroll-mt-16"
       aria-label="Destacados"
     >
       <Container>
