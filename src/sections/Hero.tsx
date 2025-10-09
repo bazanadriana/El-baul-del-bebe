@@ -2,19 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import Container from "../components/layout/Container";
 import { pillAqua } from "../styles/cta";
 import { Star, Book, Phone } from "lucide-react";
-import { smoothScrollTo } from "../lib/scroll";
 
-// Images
 import hero1 from "../assets/hero-1.jpg";
 import hero2 from "../assets/hero-2.jpg";
 import hero3 from "../assets/hero-3.jpg";
 
-type Slide = {
-  src?: string;
-  alt: string;
-  caption?: string;
-  bg?: string;
-};
+type Slide = { src?: string; alt: string; caption?: string; bg?: string };
 
 const slides: Slide[] = [
   { src: hero1, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
@@ -24,78 +17,81 @@ const slides: Slide[] = [
 
 export default function Hero() {
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
   const viewportRef = useRef<HTMLDivElement | null>(null);
-  const timerRef = useRef<number | null>(null);
 
-  // Helper: scroll the viewport to a given slide index
+  /** Scroll ONLY the carousel container (never the whole page). */
   const scrollToIndex = (i: number) => {
     const vp = viewportRef.current;
     if (!vp) return;
-    const child = vp.children[i] as HTMLElement | undefined;
-    child?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    const total = slides.length;
+    const next = (i + total) % total;
+    const x = next * vp.clientWidth;
+    vp.scrollTo({ left: x, behavior: "smooth" });
+    setIndex(next);
   };
 
-  // Keep DOM in sync when index changes (e.g., via dots or autoplay)
-  useEffect(() => {
-    scrollToIndex(index);
-  }, [index]);
-
-  // Autoplay once on mount; pause on hover/focus over the carousel
-  useEffect(() => {
-    const start = () => {
-      if (timerRef.current) return;
-      timerRef.current = window.setInterval(() => {
-        setIndex((prev) => (prev + 1) % slides.length);
-      }, 5000);
-    };
-
-    const stop = () => {
-      if (timerRef.current) {
-        window.clearInterval(timerRef.current);
-        timerRef.current = null;
-      }
-    };
-
-    const vp = viewportRef.current;
-    start();
-    vp?.addEventListener("mouseenter", stop);
-    vp?.addEventListener("mouseleave", start);
-    vp?.addEventListener("focusin", stop);
-    vp?.addEventListener("focusout", start);
-
-    return () => {
-      stop();
-      vp?.removeEventListener("mouseenter", stop);
-      vp?.removeEventListener("mouseleave", start);
-      vp?.removeEventListener("focusin", stop);
-      vp?.removeEventListener("focusout", start);
-    };
-  }, []);
-
-  // Update index when the user manually scrolls / swipes
+  /** Keep index in sync if the user swipes the carousel manually. */
   const onScroll = () => {
     const vp = viewportRef.current;
     if (!vp) return;
-    const w = vp.clientWidth;
+    const w = vp.clientWidth || 1;
     const next = Math.round(vp.scrollLeft / w);
     if (next !== index) setIndex(next);
   };
 
-  const goTo = (i: number) => {
-    const total = slides.length;
-    const next = (i + total) % total;
-    setIndex(next);
-  };
+  /** Autoplay: runs only when not paused and while the carousel is on screen. */
+  useEffect(() => {
+    if (paused) return;
+    const id = window.setInterval(() => {
+      scrollToIndex(index + 1);
+    }, 5000);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [index, paused]);
+
+  /** Pause on hover/focus, resume on leave. */
+  useEffect(() => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const pause = () => setPaused(true);
+    const resume = () => setPaused(false);
+    vp.addEventListener("mouseenter", pause);
+    vp.addEventListener("mouseleave", resume);
+    vp.addEventListener("focusin", pause);
+    vp.addEventListener("focusout", resume);
+    return () => {
+      vp.removeEventListener("mouseenter", pause);
+      vp.removeEventListener("mouseleave", resume);
+      vp.removeEventListener("focusin", pause);
+      vp.removeEventListener("focusout", resume);
+    };
+  }, []);
+
+  /** Pause autoplay when the carousel is offscreen (prevents any page “jump”). */
+  useEffect(() => {
+    const vp = viewportRef.current;
+    if (!vp || !("IntersectionObserver" in window)) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        const visible = entries[0]?.isIntersecting ?? true;
+        setPaused((p) => (!visible ? true : p && false)); // pause when hidden; resume only if not hovered
+      },
+      { root: null, threshold: 0.2 }
+    );
+    io.observe(vp);
+    return () => io.disconnect();
+  }, []);
 
   return (
     <section
       id="inicio"
-      className="relative overflow-hidden bg-white" 
+      className="relative overflow-hidden bg-gradient-to-b from-white to-white"
       aria-label="Destacados"
     >
       <Container>
         <div className="grid items-center gap-10 py-16 md:grid-cols-2 md:py-24">
-          {/* Left column: copy + CTAs */}
+          {/* Left column */}
           <div>
             <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-stone-900 px-3 py-1 text-xs font-semibold tracking-wider text-white">
               <span className="h-1.5 w-1.5 rounded-full bg-brand-400" />
@@ -112,17 +108,14 @@ export default function Hero() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              {/* was <a href="#catalogo"> */}
-              <button className={pillAqua} onClick={() => smoothScrollTo("catalogo")}>
+              <a href="#catalogo" className={pillAqua}>
                 <Book className="mr-2 h-4 w-4" />
                 Ver catálogo
-              </button>
-
-              {/* was <a href="#contacto"> */}
-              <button className={pillAqua} onClick={() => smoothScrollTo("contacto")}>
+              </a>
+              <a href="#contacto" className={pillAqua}>
                 <Phone className="mr-2 h-4 w-4" />
                 Contáctanos
-              </button>
+              </a>
             </div>
 
             <div className="mt-6 flex items-center gap-2 text-stone-600">
@@ -130,33 +123,28 @@ export default function Hero() {
               <p className="text-sm">Marcas responsables • Telas suaves • Juguetes sin tóxicos</p>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-stone-900/70">
+            <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-ink-900/70">
               <span className="inline-flex items-center rounded-full bg-white px-2 py-1">
                 ⭐⭐⭐⭐⭐ 4.9/5 clientes felices
               </span>
             </div>
           </div>
 
-          {/* Right column: Carousel */}
+          {/* Right column — Carousel */}
           <div
             ref={viewportRef}
             onScroll={onScroll}
             className="
               relative w-full overflow-x-auto overflow-y-hidden rounded-2xl
-              ring-1 ring-black/5 shadow-sm
-              scroll-smooth
+              ring-1 ring-black/5 shadow
               snap-x snap-mandatory
               [scrollbar-width:none] [&::-webkit-scrollbar]:hidden
             "
-            aria-roledescription="carrusel"
+            aria-roledescription="carousel"
           >
             <div className="flex w-full">
               {slides.map((s, i) => (
-                <figure
-                  key={i}
-                  className="relative min-w-full snap-start"
-                  aria-label={`${i + 1} de ${slides.length}`}
-                >
+                <figure key={i} className="relative min-w-full snap-start" aria-label={`${i + 1} de ${slides.length}`}>
                   {s.src ? (
                     <img
                       src={s.src}
@@ -167,11 +155,8 @@ export default function Hero() {
                       decoding="async"
                     />
                   ) : (
-                    <div
-                      className={`h-72 w-full md:h-96 bg-gradient-to-br ${s.bg ?? "from-brand-300 via-brand-500 to-emerald-400"}`}
-                    />
+                    <div className={`h-72 w-full md:h-96 bg-gradient-to-br ${s.bg ?? "from-brand-300 via-brand-500 to-emerald-400"}`} />
                   )}
-
                   {s.caption && (
                     <figcaption className="absolute bottom-3 left-3 rounded-lg bg-black/40 px-3 py-1 text-sm font-semibold text-white backdrop-blur">
                       {s.caption}
@@ -184,29 +169,29 @@ export default function Hero() {
             {/* Prev / Next */}
             <button
               aria-label="Anterior"
-              onClick={() => goTo(index - 1)}
+              onClick={() => scrollToIndex(index - 1)}
               className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400"
             >
               ‹
             </button>
             <button
               aria-label="Siguiente"
-              onClick={() => goTo(index + 1)}
+              onClick={() => scrollToIndex(index + 1)}
               className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full bg-white/90 p-2 shadow hover:bg-white focus:outline-none focus:ring-2 focus:ring-brand-400"
             >
               ›
             </button>
 
             {/* Dots */}
-            <div className="absolute inset-x-0 bottom-2 flex justify-center gap-2">
+            <div className="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center gap-2">
               {slides.map((_, i) => (
-                <button
+                <span
                   key={i}
-                  onClick={() => goTo(i)}
+                  role="button"
                   aria-label={`Ir a la diapositiva ${i + 1}`}
-                  className={`h-2 w-2 rounded-full transition ${
-                    index === i ? "bg-violet-600" : "bg-white/70 ring-1 ring-black/10"
-                  }`}
+                  onClick={() => scrollToIndex(i)}
+                  className={`pointer-events-auto h-2 w-2 rounded-full transition
+                    ${index === i ? "bg-violet-600" : "bg-white/70 ring-1 ring-black/10"}`}
                 />
               ))}
             </div>
