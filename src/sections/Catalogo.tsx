@@ -1,4 +1,4 @@
-import { Gift, Leaf, Shirt } from "lucide-react";
+import { Gift, Leaf, Shirt, Baby } from "lucide-react";
 import Container from "../components/layout/Container";
 import SectionTitle from "../components/common/SectionTitle";
 import Badge from "../components/common/Badge";
@@ -10,6 +10,7 @@ export default function Catalogo() {
     { key: "Ropa", label: "Ropa", icon: <Shirt className="h-5 w-5 text-brand-600" /> },
     { key: "Juguetes", label: "Juguetes", icon: <Gift className="h-5 w-5 text-brand-600" /> },
     { key: "Accesorios", label: "Accesorios", icon: <Leaf className="h-5 w-5 text-brand-600" /> },
+    { key: "Todo para tu bebé", label: "Todo para tu bebé", icon: <Baby className="h-5 w-5 text-brand-600" /> },
   ];
 
   return (
