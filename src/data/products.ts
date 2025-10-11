@@ -1,22 +1,24 @@
-import type { Product } from "../types";
+export type Product = {
+  id: string;
+  name: string;
+  description: string;
+  emoji?: string;
+  badge?: string;
+  images?: { src: string; alt?: string }[]; // NEW
+};
 
 export const products: Product[] = [
-  { id: "ropa-algodon", name: "Conjuntos de algodón orgánico",
-    description: "Suaves, hipoalergénicos y lavables a máquina. Ideales para pieles sensibles.",
-    badge: "0–12 meses", emoji: "👕", category: "Ropa" },
-  { id: "juguete-sensorial", name: "Set sensorial de madera",
-    description: "Favorece motricidad fina y estimula la curiosidad con texturas seguras.",
-    badge: "+6 meses", emoji: "🧩", category: "Juguetes" },
-  { id: "accesorio-muselina", name: "Muselinas multiuso",
-    description: "Transpirables, ligeras y perfectas para paseos, siestas y lactancia.",
-    badge: "Pack 3 piezas", emoji: "🪄", category: "Accesorios" },
-  { id: "ropa-mameluco", name: "Mamelucos estampados",
-    description: "Broches libres de níquel y telas resistentes para aventuras diarias.",
-    badge: "6–24 meses", emoji: "🧸", category: "Ropa" },
-  { id: "juguete-peluche", name: "Peluches abrazables",
-    description: "Relleno reciclado y costuras reforzadas. Acompañantes de dulces sueños.",
-    badge: "Lavable", emoji: "🐻", category: "Juguetes" },
-  { id: "accesorio-gorrito", name: "Gorritos y baberos",
-    description: "Set coordinado para proteger del sol y de pequeñas babitas.",
-    badge: "Edición colorida", emoji: "🎀", category: "Accesorios" },
+  {
+    id: "algodon-organico",
+    name: "Conjuntos de algodón orgánico",
+    description:
+      "Suaves, hipoalergénicos y lavables a máquina. Ideales para pieles sensibles.",
+    badge: "0–12 meses",
+    images: [
+      { src: "/catalogo/algodon/1.jpg", alt: "Conjunto algodón orgánico 1" },
+      { src: "/catalogo/algodon/2.jpg", alt: "Conjunto algodón orgánico 2" },
+      { src: "/catalogo/algodon/3.jpg", alt: "Conjunto algodón orgánico 3" },
+    ],
+  },
+  // ...the rest; each can have its own images
 ];

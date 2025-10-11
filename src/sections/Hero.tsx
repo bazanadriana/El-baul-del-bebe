@@ -6,6 +6,7 @@ import { Star, Book, Phone } from "lucide-react";
 import hero1 from "../assets/hero-1.jpg";
 import hero2 from "../assets/hero-2.jpg";
 import hero3 from "../assets/hero-3.jpg";
+import hero4 from "../assets/seasonal.png";
 
 type Slide = { src?: string; alt: string; caption?: string; bg?: string };
 
@@ -13,6 +14,7 @@ const slides: Slide[] = [
   { src: hero1, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
   { src: hero2, alt: "Juguetes educativos", caption: "Juguetes que inspiran" },
   { src: hero3, alt: "Accesorios y cuidado", caption: "Todo para su cuidado" },
+  { src: hero4, alt: "En tenporada", caption: "En temporada" },
 ];
 
 export default function Hero() {

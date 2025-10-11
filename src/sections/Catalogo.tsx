@@ -4,6 +4,7 @@ import SectionTitle from "../components/common/SectionTitle";
 import Badge from "../components/common/Badge";
 import { products } from "../data/products";
 import LogoElBaul from "../assets/logo-elbaul.jpg";
+import Carousel from "../components/common/Carousel";
 
 export default function Catalogo() {
   const categories = [
@@ -51,18 +52,42 @@ export default function Catalogo() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {products.map((p) => (
             <article key={p.id} className="group card overflow-hidden transition hover:shadow-lg">
-              <div className="flex items-start gap-4 p-5">
-                <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-brand-100 to-stone-100 text-3xl">
-                  <span aria-hidden>{p.emoji}</span>
+              {/* MEDIA: carousel if images, otherwise an emoji tile */}
+              {p.images?.length ? (
+                <div className="p-5 pb-0">
+                  <Carousel
+                    slides={p.images}
+                    aspect="aspect-[4/3]"
+                    rounded="rounded-2xl"
+                    autoMs={5000}
+                  />
                 </div>
-                <div>
+              ) : (
+                <div className="p-5 pb-0">
+                  <div className="grid h-32 w-full place-items-center rounded-2xl bg-gradient-to-br from-brand-100 to-stone-100 text-5xl">
+                    <span aria-hidden>{p.emoji ?? "🧸"}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* BODY */}
+              <div className="flex items-start gap-4 p-5">
+                {!p.images?.length && (
+                  <div className="grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-brand-100 to-stone-100 text-3xl">
+                    <span aria-hidden>{p.emoji ?? "🧸"}</span>
+                  </div>
+                )}
+
+                <div className="w-full">
                   <h3 className="text-lg font-semibold text-stone-900">{p.name}</h3>
                   <p className="mt-1 text-sm text-stone-600">{p.description}</p>
+
                   {p.badge && (
                     <div className="mt-2">
                       <Badge>{p.badge}</Badge>
                     </div>
                   )}
+
                   <div className="mt-4">
                     <a
                       href="#contacto"
