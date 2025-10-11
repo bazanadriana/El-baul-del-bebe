@@ -1,6 +1,6 @@
-// src/App.tsx
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
+
 import Hero from "./sections/Hero";
 import Catalogo from "./sections/Catalogo";
 import Features from "./sections/Features";
@@ -9,18 +9,15 @@ import Contacto from "./sections/Contacto";
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-stone-900">
       <Navbar />
-
-      {/* Keep content clear of the sticky navbar (h-16) */}
-      <main className="relative z-[2]">
+      <main>
         <Hero />
         <Catalogo />
         <Features />
         <Visitanos />
         <Contacto />
       </main>
-
       <Footer />
     </div>
   );

@@ -71,9 +71,9 @@ export const products: Product[] = [
     description: "Set coordinado para proteger del sol y de pequeñas babitas.",
     badge: "Edición colorida",
     images: [
-      { src: "/catalogo/gorritos/1.jpg", alt: "Gorritos y baberos 1" },
-      { src: "/catalogo/gorritos/2.jpg", alt: "Gorritos y baberos 2" },
-      { src: "/catalogo/gorritos/3.jpg", alt: "Gorritos y baberos 3" },
+      { src: "/catalogo/algodon/1.jpg", alt: "Conjunto algodón orgánico 1" },
+      { src: "/catalogo/algodon/2.jpg", alt: "Conjunto algodón orgánico 2" },
+      { src: "/catalogo/algodon/3.jpg", alt: "Conjunto algodón orgánico 3" },
     ],
   },
   
