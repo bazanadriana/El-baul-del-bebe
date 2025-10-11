@@ -15,10 +15,11 @@ export const products: Product[] = [
       "Suaves, hipoalergénicos y lavables a máquina. Ideales para pieles sensibles.",
     badge: "0–12 meses",
     images: [
-      { src: "/catalogo/algodon/1.jpg", alt: "Conjunto algodón orgánico 1" },
-      { src: "/catalogo/algodon/2.jpg", alt: "Conjunto algodón orgánico 2" },
-      { src: "/catalogo/algodon/3.jpg", alt: "Conjunto algodón orgánico 3" },
+      { src: "/catalogo/algodon1.jpg", alt: "Conjunto algodón orgánico 1" },
+      { src: "/catalogo/algodon2.jpg", alt: "Conjunto algodón orgánico 2" },
+      { src: "/catalogo/algodon3.jpg", alt: "Conjunto algodón orgánico 3" },
     ],
   },
-  // ...the rest; each can have its own images
+  // ...
 ];
+
