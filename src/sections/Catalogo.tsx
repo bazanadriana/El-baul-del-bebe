@@ -3,7 +3,6 @@ import Container from "../components/layout/Container";
 import SectionTitle from "../components/common/SectionTitle";
 import Badge from "../components/common/Badge";
 import { products } from "../data/products";
-import LogoElBaul from "../assets/logo-elbaul.jpg";
 import Carousel from "../components/common/Carousel";
 
 export default function Catalogo() {
@@ -20,11 +19,7 @@ export default function Catalogo() {
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
-          backgroundImage: `url(${LogoElBaul})`,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "right -18px top -18px",
-          backgroundSize: "min(78vmin, 600px)",
-          opacity: 0.1,
+        
         }}
       />
 
