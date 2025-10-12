@@ -1,6 +1,7 @@
-// tailwind.config.js
-module.exports = {
-  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
+  darkMode: ["class"],
   theme: {
     extend: {
       colors: {
@@ -10,7 +11,7 @@ module.exports = {
           200: "#A5F3FC",
           300: "#67E8F9",
           400: "#22D3EE",
-          500: "#06B6D4", // vivid aqua (primary)
+          500: "#06B6D4", // primary
           600: "#0891B2",
           700: "#0E7490",
           800: "#155E75",
@@ -19,11 +20,11 @@ module.exports = {
         grape: {
           400: "#8B5CF6",
           500: "#7C3AED",
-          600: "#6D28D9", // bold purple (secondary/CTA)
+          600: "#6D28D9", // secondary/CTA
           700: "#5B21B6",
         },
         raspberry: {
-          500: "#E11D48", // accent for sale/labels
+          500: "#E11D48", // sale/labels
           600: "#BE123C",
         },
         sunshine: {
@@ -39,10 +40,8 @@ module.exports = {
         grape: "0 10px 30px -10px rgba(124,58,237,0.35)",
       },
       borderRadius: { xl2: "1.25rem" },
-
-      // NEW: logo font + animations
       fontFamily: {
-        logo: ['"Baloo 2"', "system-ui", "sans-serif"],
+        logo: ['"Baloo 2"', "ui-sans-serif", "system-ui", "sans-serif"],
       },
       keyframes: {
         pop: {
