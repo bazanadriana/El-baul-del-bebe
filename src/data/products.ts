@@ -25,43 +25,45 @@ export const products: Product[] = [
   },
 
   {
-    id: "set-sensorial-madera",
-    name: "Set sensorial de madera",
+    id: "carreolas",
+    name: "Carreolas",
     description:
-      "Favorece motricidad fina y estimula la curiosidad con texturas seguras.",
-    badge: "+6 meses",
+      "Ligeras, seguras y fáciles de maniobrar. Ideales para paseos diarios y viajes.",
+    badge: "0–36 meses",
     images: [
-      { src: a("catalogo/madera/1.jpg"), alt: "Set sensorial madera 1" },
-      { src: a("catalogo/madera/2.jpg"), alt: "Set sensorial madera 2" },
-      { src: a("catalogo/madera/3.jpg"), alt: "Set sensorial madera 3" },
+      { src: a("catalogo/carreolas/1.jpg"), alt: "Carreola 1" },
+      { src: a("catalogo/carreolas/2.jpg"), alt: "Carreola 2" },
+      { src: a("catalogo/carreolas/3.jpg"), alt: "Carreola 3" },
+    ],
+  },
+  
+
+  {
+    id: "accesorios-de-bano", 
+    name: "Accesorios de baño",
+    description:
+      "Bañeras (rígidas y plegables), cojines de soporte, orinales y asientos reductores para cada etapa.",
+    badge: "Higiene",
+    images: [
+      { src: a("catalogo/bano/1.jpg"), alt: "Bañera para bebé" },
+      { src: a("catalogo/bano/2.jpg"), alt: "Bañera plegable con soporte" },
+      { src: a("catalogo/bano/3.jpg"), alt: "Orinales y asientos reductores" },
     ],
   },
 
   {
-    id: "muselinas-multiuso",
-    name: "Muselinas multiuso",
+    id: "cunitas",
+    name: "Cunitas",
     description:
-      "Transpirables, ligeras y perfectas para paseos, siestas y lactancia.",
-    badge: "Pack 3 piezas",
+      "Opciones seguras y cómodas: portátiles, de madera y con acabados no tóxicos.",
+    badge: "Recién nacidos",
     images: [
-      { src: a("catalogo/muselinas/1.jpg"), alt: "Muselinas 1" },
-      { src: a("catalogo/muselinas/2.jpg"), alt: "Muselinas 2" },
-      { src: a("catalogo/muselinas/3.jpg"), alt: "Muselinas 3" },
+      { src: a("catalogo/cunas/1.jpg"), alt: "Cunita portátil 1" },
+      { src: a("catalogo/cunas/2.jpg"), alt: "Cunita portátil 2" },
+      { src: a("catalogo/cunas/3.jpg"), alt: "Cunita portátil 3" },
     ],
   },
-
-  {
-    id: "mamelucos-estampados",
-    name: "Mamelucos estampados",
-    description:
-      "Broches libres de níquel y telas resistentes para aventuras diarias.",
-    badge: "6–24 meses",
-    images: [
-      { src: a("catalogo/mamelucos/1.jpg"), alt: "Mamelucos 1" },
-      { src: a("catalogo/mamelucos/2.jpg"), alt: "Mamelucos 2" },
-      { src: a("catalogo/mamelucos/3.jpg"), alt: "Mamelucos 3" },
-    ],
-  },
+  
 
   {
     id: "peluches-abrazables",
@@ -77,15 +79,56 @@ export const products: Product[] = [
   },
 
   {
-    id: "gorritos-baberos",
-    name: "Gorritos y baberos",
+    id: "silla-alta",
+    name: "Silla alta para bebé",
     description:
-      "Set coordinado para proteger del sol y de pequeñas babitas.",
-    badge: "Edición colorida",
+      "Silla para comer con bandeja desmontable, cinturón y fácil de limpiar.",
+    badge: "Alimentación",
     images: [
-      { src: a("catalogo/algodon/algodon-1.jpg"), alt: "Conjunto algodón orgánico 1" },
-      { src: a("catalogo/algodon/algodon-2.jpg"), alt: "Conjunto algodón orgánico 2" },
-      { src: a("catalogo/algodon/algodon-3.jpg"), alt: "Conjunto algodón orgánico 3" },
+      { src: a("catalogo/sillas/1.jpg"), alt: "Silla alta para bebé - vista lateral" },
+      { src: a("catalogo/sillas/2.jpg"), alt: "Silla alta para bebé - bandeja y asiento" },
+      { src: a("catalogo/sillas/3.jpg"), alt: "Silla alta para bebé - detalle" },
     ],
   },
+
+  {
+    id: "juegos-de-cuna",
+    name: "Juegos de cuna",
+    description:
+      "Sets de 5 piezas con edredón, sábanas y cojines decorativos para la habitación.",
+    badge: "Cama/cuna",
+    images: [
+      { src: a("catalogo/juegos-cuna/1.jpg"), alt: "Juego de cuna perrito" },
+      { src: a("catalogo/juegos-cuna/2.jpg"), alt: "Juego de cuna bosque" },
+      { src: a("catalogo/juegos-cuna/3.jpg"), alt: "Juego de cuna elefante" },
+    ],
+  },
+  
+  {
+    id: "andadores",
+    name: "Andadores",
+    description:
+      "Andadores con charola de juego y altura ajustable para los primeros pasos.",
+    badge: "6–18 meses",
+    images: [
+      { src: a("catalogo/andadores/1.jpg"), alt: "Andador azul" },
+      { src: a("catalogo/andadores/2.jpg"), alt: "Andador rosa" },
+      { src: a("catalogo/andadores/3.jpg"), alt: "Detalle charola" },
+    ],
+  },
+  
+  {
+    id: "montables",
+    name: "Montables para bebé",
+    description:
+      "Motos, scooter y correpasillos resistentes para juego activo y seguro.",
+    badge: "18–48 meses",
+    images: [
+      { src: a("catalogo/montables/1.jpg"), alt: "Moto infantil" },
+      { src: a("catalogo/montables/2.jpg"), alt: "Scooter infantil" },
+      { src: a("catalogo/montables/3.jpg"), alt: "Correpasillos tipo auto" },
+    ],
+  },
+  
+  
 ];

@@ -1,4 +1,3 @@
-// src/sections/Visitanos.tsx
 import { Clock, MapPin, Info, Map, Earth } from "lucide-react";
 import Container from "../components/layout/Container";
 import SectionTitle from "../components/common/SectionTitle";
@@ -62,7 +61,7 @@ export default function Visitanos() {
 
             <div className="mt-4 inline-flex items-center gap-2 rounded-xl bg-brand-50 px-3 py-2 text-sm text-brand-800 ring-1 ring-inset ring-brand-200">
               <Info className="h-4 w-4 text-brand-700" />
-              <span>Fachada color naranja (junto a la carnicería).</span>
+              <span>Fachada color naranja (junto a la panadería).</span>
             </div>
 
             <div className="mt-6 flex items-center gap-3">

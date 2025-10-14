@@ -12,7 +12,7 @@ type Slide = { src?: string; alt: string; caption?: string; bg?: string };
 
 const slides: Slide[] = [
   { src: hero1, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
-  { src: hero2, alt: "Juguetes educativos", caption: "Juguetes que inspiran" },
+  { src: hero2, alt: "Juguetes educativos", caption: "Accesorios y mas" },
   { src: hero3, alt: "Accesorios y cuidado", caption: "Todo para su cuidado" },
   { src: hero4, alt: "En tenporada", caption: "En temporada" },
 ];
@@ -121,7 +121,7 @@ export default function Hero() {
 
             <div className="mt-6 flex items-center gap-2 text-stone-600">
               <Star className="h-5 w-5 text-brand-700" />
-              <p className="text-sm">Marcas responsables • Telas suaves • Juguetes sin tóxicos</p>
+              <p className="text-sm">Marcas responsables • Telas suaves • Juguetes lindos</p>
             </div>
 
             <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-ink-900/70">
