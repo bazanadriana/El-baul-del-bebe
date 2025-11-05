@@ -66,17 +66,18 @@ export const products: Product[] = [
   
 
   {
-    id: "peluches-abrazables",
-    name: "Peluches abrazables",
+    id: "peluches-y-juguetes", // sin ñ/acentos para la URL
+    name: "Peluches y Juguetes",
     description:
-      "Relleno reciclado y costuras reforzadas. Acompañantes de dulces sueños.",
-    badge: "Lavable",
+      "Peluches suaves, muñecas, bloques y sets de juego para acompañar cada etapa.",
+    badge: "3+ meses",
     images: [
-      { src: a("catalogo/peluches/1.jpg"), alt: "Peluches 1" },
-      { src: a("catalogo/peluches/2.jpg"), alt: "Peluches 2" },
-      { src: a("catalogo/peluches/3.jpg"), alt: "Peluches 3" },
+      { src: a("catalogo/peluches-juguetes/1.jpg"), alt: "Muñecas y figuras" },
+      { src: a("catalogo/peluches-juguetes/2.jpg"), alt: "Peluches y caballito" },
+      { src: a("catalogo/peluches-juguetes/3.jpg"), alt: "Bloques y mesa de construcción" },
     ],
   },
+  
 
   {
     id: "silla-alta",
