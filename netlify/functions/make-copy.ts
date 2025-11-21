@@ -9,8 +9,9 @@ export const handler: Handler = async (event) => {
       context?: string; imageUrl?: string;
     };
 
-    const prompt = `Genera un mensaje breve para WhatsApp (<=220 caracteres) en español, amable y claro.
-Sin hashtags. Si hay foto, describe brevemente lo que se ve.`;
+    const prompt = `Escribe un mensaje breve (<= 200 caracteres), amable, para WhatsApp.
+Incluye el nombre del producto si se proporciona y una pregunta clara (talla/precio/disponibilidad).
+Sin hashtags, sin comillas, sin caracteres raros.`;
 
     const content: any[] = [{ type: "input_text", text: `${prompt}\nContexto: ${context ?? ""}` }];
     if (imageUrl) content.push({ type: "input_image", image_url: imageUrl, detail: "low" });
@@ -23,12 +24,25 @@ Sin hashtags. Si hay foto, describe brevemente lo que se ve.`;
       ],
       max_output_tokens: 140,
     });
+    const raw = (r.output_text || "").trim();
 
+    // 2) Sanitize output to avoid � diamonds
+    const clean = (s: string) =>
+      s
+        .normalize("NFC")
+        .replace(/[“”]/g, '"')
+        .replace(/[‘’]/g, "'")
+        .replace(/\uFFFD/g, "")          // strip replacement char
+        .replace(/\u200B/g, "");         // zero-width space, just in case
+    
+    const text = clean(raw);
+    
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: (r.output_text || "").trim() }),
+      body: JSON.stringify({ text }),
     };
+
   } catch (e) {
     console.error(e);
     return { statusCode: 500, body: "make-copy error" };
