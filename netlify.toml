@@ -1,13 +1,13 @@
 [build]
-  command   = "npm run build"
-  publish   = "dist"
-  functions = "netlify/functions"
+  command = "npm run build"
+  publish = "dist"
 
-[dev]
-  framework = "vite"   # lets Netlify proxy to your Vite dev server
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
 
-# (optional, you already call functions directly)
+# SPA fallback
 [[redirects]]
-  from = "/api/*"
-  to   = "/.netlify/functions/:splat"
+  from = "/*"
+  to = "/index.html"
   status = 200

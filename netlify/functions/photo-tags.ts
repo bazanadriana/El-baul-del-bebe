@@ -1,39 +1,80 @@
 import type { Handler } from "@netlify/functions";
-import { openai, model } from "./_openai";
+import { openai } from "./_openai";
+import { corsHeaders, preflight } from "./_cors";
 
-const systemTagger =
-  "Analiza la imagen y devuelve un JSON MUY corto con 'tags' (3–6 sustantivos simples) y 'colors' (2–3 colores principales). Solo responde JSON.";
+const MODEL = "gpt-4o-mini";
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
+  // CORS preflight
+  const pf = preflight(event);
+  if (pf) return pf;
+
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, headers: corsHeaders, body: "Method not allowed" };
+  }
 
   try {
     const { imageUrl } = JSON.parse(event.body || "{}") as { imageUrl?: string };
-    if (!imageUrl) return { statusCode: 400, body: "Missing imageUrl" };
+    if (!imageUrl) {
+      return { statusCode: 400, headers: corsHeaders, body: "Missing imageUrl" };
+    }
+
+    // Build Responses input (role + parts)
+    const input = [
+      {
+        role: "system" as const,
+        content: [
+          {
+            type: "input_text" as const,
+            text:
+              // Ask for pure JSON to avoid extra prose
+              'Devuelve ÚNICAMENTE JSON con la forma {"tags": string[], "colors": string[]} ' +
+              "sin texto adicional. Etiquetas: 1–5 palabras simples y útiles para un catálogo. " +
+              "Colores: nombres comunes (p. ej., rosa, blanco, azul).",
+          },
+        ],
+      },
+      {
+        role: "user" as const,
+        content: [
+          { type: "input_image" as const, image_url: imageUrl, detail: "low" as const },
+        ],
+      },
+    ];
 
     const res = await openai.responses.create({
-      model,
-      input: [
-        { role: "system", content: systemTagger },
-        {
-          role: "user",
-          content: [{ type: "input_image", image_url: imageUrl, detail: "low" }],
-        },
-      ],
+      model: MODEL,
+      input,
       max_output_tokens: 200,
     });
 
-    let json = { tags: [] as string[], colors: [] as string[] };
+    // Fallback-safe parsing
+    const raw = (res.output_text || "").trim();
+    let json: unknown = { tags: [], colors: [] as string[] };
+
     try {
-      // The model outputs text; we asked for JSON text
-      json = JSON.parse(res.output_text || "{}");
-    } catch (_) {
-      /* fallback stays empty */
+      // If the model ever wraps code blocks, strip them:
+      const cleaned = raw.replace(/^```json\s*|\s*```$/g, "");
+      json = JSON.parse(cleaned);
+      // Basic shape guard
+      if (
+        typeof (json as any) !== "object" ||
+        !Array.isArray((json as any).tags) ||
+        !Array.isArray((json as any).colors)
+      ) {
+        json = { tags: [], colors: [] };
+      }
+    } catch {
+      json = { tags: [], colors: [] };
     }
 
-    return { statusCode: 200, headers: { "Content-Type": "application/json" }, body: JSON.stringify(json) };
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+      body: JSON.stringify(json),
+    };
   } catch (e) {
     console.error(e);
-    return { statusCode: 500, body: "photo-tags error" };
+    return { statusCode: 500, headers: corsHeaders, body: "photo-tags error" };
   }
 };

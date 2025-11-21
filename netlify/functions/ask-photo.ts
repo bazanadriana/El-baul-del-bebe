@@ -1,39 +1,46 @@
 import type { Handler } from "@netlify/functions";
-import { openai, model } from "./_openai";
+import { openai, systemPhotoQA } from "./_openai";
+import { corsHeaders, preflight } from "./_cors";
 
-const systemPhotoQA =
-  "Eres un asistente breve y útil. Responde en español con 1–3 oraciones. Si no es visible en la imagen, sugiere preguntar por WhatsApp.";
+const MODEL = "gpt-4o-mini";
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
+  const pf = preflight(event);
+  if (pf) return pf;
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, headers: corsHeaders, body: "Method not allowed" };
+  }
 
   try {
     const { imageUrl, question } = JSON.parse(event.body || "{}") as {
       imageUrl?: string;
       question?: string;
     };
-    if (!imageUrl || !question) return { statusCode: 400, body: "Missing imageUrl/question" };
+    if (!imageUrl || !question) {
+      return { statusCode: 400, headers: corsHeaders, body: "Missing imageUrl or question" };
+    }
 
-    const res = await openai.responses.create({
-      model,
-      input: [
-        { role: "system", content: systemPhotoQA },
-        {
-          role: "user",
-          content: [
-            { type: "input_text", text: question },
-            // send either URL or data URL; both work
-            { type: "input_image", image_url: imageUrl, detail: "low" },
-          ],
-        },
-      ],
-      max_output_tokens: 200,
-    });
+    const input = [
+      { role: "system" as const, content: [{ type: "input_text" as const, text: systemPhotoQA }] },
+      {
+        role: "user" as const,
+        content: [
+          { type: "input_text" as const, text: question },
+          { type: "input_image" as const, image_url: imageUrl, detail: "low" as const },
+        ],
+      },
+    ];
 
-    const answer = res.output_text || "Lo siento, no pude analizar la foto.";
-    return { statusCode: 200, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ answer }) };
+    const res = await openai.responses.create({ model: MODEL, input, max_output_tokens: 200 });
+    const answer = (res.output_text || "").trim() || "Lo siento, no pude analizar la foto.";
+
+    return {
+      statusCode: 200,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+      body: JSON.stringify({ answer }),
+    };
   } catch (e) {
     console.error(e);
-    return { statusCode: 500, body: "ask-photo error" };
+    return { statusCode: 500, headers: corsHeaders, body: "ask-photo error" };
   }
 };
