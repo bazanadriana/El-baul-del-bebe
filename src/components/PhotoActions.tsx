@@ -8,23 +8,60 @@ type Props = {
   whatsappNumber?: string;
 };
 
-// ---------- simple global gate to avoid API bursts (helps with 429s) ----------
-let nextAllowedAt = 0;
-function gate(cooldownMs = 20_000) {
-  const now = Date.now();
-  if (now < nextAllowedAt) {
-    return { ok: false, waitMs: nextAllowedAt - now };
-  }
-  nextAllowedAt = now + cooldownMs;
-  return { ok: true, waitMs: 0 };
-}
-// -----------------------------------------------------------------------------
-
 // Are we running locally?
 const isLocal =
   typeof window !== "undefined" &&
   (window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1");
+
+/** Delay helper */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** fetch JSON with timeout + light retry for 429/5xx */
+async function fetchJSON<T>(
+  url: string,
+  body: unknown,
+  opts: { timeout?: number; retries?: number } = {}
+): Promise<T> {
+  const { timeout = 28000, retries = 1 } = opts;
+  let attempt = 0;
+
+  while (true) {
+    const ac = new AbortController();
+    const t = setTimeout(() => ac.abort(), timeout);
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+        signal: ac.signal,
+      });
+      clearTimeout(t);
+
+      if (!res.ok) {
+        // retry on common transient errors
+        if ((res.status === 429 || res.status >= 500) && attempt < retries) {
+          attempt += 1;
+          await sleep(600 * attempt); // backoff: 600ms, 1200ms, ...
+          continue;
+        }
+        const text = await res.text().catch(() => "");
+        throw new Error(`${url} ${res.status} ${text}`);
+      }
+      return (await res.json()) as T;
+    } catch (err: any) {
+      clearTimeout(t);
+      // retry on abort/network once
+      if ((err?.name === "AbortError" || err?.message?.includes("Network")) && attempt < retries) {
+        attempt += 1;
+        await sleep(600 * attempt);
+        continue;
+      }
+      throw err;
+    }
+  }
+}
 
 /** Turn a remote image into a data: URL (useful for local dev where the URL isn’t public) */
 async function toDataUrl(url: string): Promise<string> {
@@ -62,11 +99,7 @@ function cleanText(s: string) {
     .replace(/\u200B/g, "");
 }
 
-export default function PhotoActions({
-  imageSrc,
-  caption,
-  whatsappNumber,
-}: Props) {
+export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Props) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -77,7 +110,7 @@ export default function PhotoActions({
 
   const abs = useMemo(() => toAbsolute(imageSrc), [imageSrc]);
 
-  /** The image string we’ll send to the function:
+  /** Image string to send to functions:
    * - local dev: convert to data: URL so OpenAI can fetch it
    * - prod: use absolute https URL
    */
@@ -87,8 +120,7 @@ export default function PhotoActions({
       try {
         return await toDataUrl(abs);
       } catch {
-        // fall back to whatever we have
-        return abs;
+        return abs; // fall back
       }
     }
     return abs;
@@ -96,35 +128,25 @@ export default function PhotoActions({
 
   async function askPhoto() {
     if (!question.trim()) return;
-
-    // rate-limit gate
-    const g = gate();
-    if (!g.ok) {
-      setError(`Espera ${Math.ceil(g.waitMs / 1000)}s y vuelve a intentar.`);
-      return;
-    }
-
     setLoadingAsk(true);
     setAnswer("");
     setError(null);
+
     try {
-      const r = await fetch("/.netlify/functions/ask-photo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          imageUrl: await imageForAI(),
-          question: caption
-            ? `${question.trim()} (Producto: ${caption})`
-            : question.trim(),
-        }),
-      });
-      if (!r.ok) throw new Error(`ask-photo ${r.status}`);
-      const j = await r.json();
+      const payload = {
+        imageUrl: await imageForAI(),
+        question: caption ? `${question.trim()} (Producto: ${caption})` : question.trim(),
+      };
+      const j = await fetchJSON<{ answer?: string }>(
+        "/.netlify/functions/ask-photo",
+        payload,
+        { retries: 2 }
+      );
       setAnswer(j.answer || "Lo siento, no pude analizar la foto.");
     } catch (e) {
       console.error(e);
       setError(
-        "No se pudo consultar la imagen (¿variable OPENAI_API_KEY o URL pública?)."
+        "No se pudo consultar la imagen (posible límite o URL no pública)."
       );
       setAnswer("Lo siento, no pude analizar la foto. Intenta de nuevo.");
     } finally {
@@ -133,29 +155,22 @@ export default function PhotoActions({
   }
 
   async function genWhatsApp() {
-    // rate-limit gate
-    const g = gate();
-    if (!g.ok) {
-      setError(`Espera ${Math.ceil(g.waitMs / 1000)}s y vuelve a intentar.`);
-      return;
-    }
-
     setLoadingCopy(true);
     setError(null);
     const fallback = cleanText(
       "¡Hola! Tengo algunas preguntas sobre un artículo que vi en la página de tu tienda."
     );
+
     try {
-      const r = await fetch("/.netlify/functions/make-copy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          context: caption ? `Producto: ${caption}` : "",
-          imageUrl: await imageForAI(),
-        }),
-      });
-      if (!r.ok) throw new Error(`make-copy ${r.status}`);
-      const j = await r.json();
+      const payload = {
+        context: caption ? `Producto: ${caption}` : "",
+        imageUrl: await imageForAI(),
+      };
+      const j = await fetchJSON<{ text?: string }>(
+        "/.netlify/functions/make-copy",
+        payload,
+        { retries: 2 }
+      );
       openWhatsApp(cleanText(j.text || fallback));
     } catch (e) {
       console.error(e);
@@ -167,27 +182,18 @@ export default function PhotoActions({
   }
 
   async function suggestTags() {
-    // rate-limit gate
-    const g = gate();
-    if (!g.ok) {
-      setError(`Espera ${Math.ceil(g.waitMs / 1000)}s y vuelve a intentar.`);
-      return;
-    }
-
     setLoadingTags(true);
     setTags([]);
     setError(null);
+
     try {
-      const r = await fetch("/.netlify/functions/photo-tags", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: await imageForAI() }),
-      });
-      if (!r.ok) throw new Error(`photo-tags ${r.status}`);
-      const j = await r.json();
-      const t = Array.from(
-        new Set([...(j.tags || []), ...(j.colors || [])])
-      ).slice(0, 8);
+      const payload = { imageUrl: await imageForAI() };
+      const j = await fetchJSON<{ tags?: string[]; colors?: string[] }>(
+        "/.netlify/functions/photo-tags",
+        payload,
+        { retries: 2 }
+      );
+      const t = Array.from(new Set([...(j.tags || []), ...(j.colors || [])])).slice(0, 8);
       setTags(t);
     } catch (e) {
       console.error(e);
@@ -207,9 +213,7 @@ export default function PhotoActions({
 
   return (
     <div className="mt-4 rounded-2xl border px-4 py-3">
-      <p className="mb-2 text-sm font-semibold text-stone-800">
-        Pregúntale a la foto
-      </p>
+      <p className="mb-2 text-sm font-semibold text-stone-800">Pregúntale a la foto</p>
 
       <div className="flex gap-2">
         <input
@@ -217,7 +221,8 @@ export default function PhotoActions({
           placeholder="¿Qué te gustaría saber?"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && askPhoto()}
+          onKeyDown={(e) => e.key === "Enter" && !loadingAsk && askPhoto()}
+          disabled={loadingAsk}
         />
         <button
           type="button"
@@ -235,7 +240,9 @@ export default function PhotoActions({
         </p>
       )}
       {error && (
-        <p className="mt-2 text-sm font-medium text-brand-700">{error}</p>
+        <p className="mt-2 text-sm font-medium text-brand-700">
+          {error}
+        </p>
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
