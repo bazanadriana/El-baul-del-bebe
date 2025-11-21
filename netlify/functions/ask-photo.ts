@@ -6,8 +6,7 @@ export const handler: Handler = async (event) => {
 
   try {
     const { imageUrl, question } = JSON.parse(event.body || "{}") as {
-      imageUrl?: string;
-      question?: string;
+      imageUrl?: string; question?: string;
     };
     if (!imageUrl || !question) return { statusCode: 400, body: "Missing imageUrl or question" };
 
@@ -19,7 +18,7 @@ export const handler: Handler = async (event) => {
           role: "user",
           content: [
             { type: "input_text", text: question },
-            { type: "input_image", image_url: imageUrl, detail: "low" }, // <= add detail
+            { type: "input_image", image_url: imageUrl, detail: "low" },
           ],
         },
       ],
