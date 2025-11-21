@@ -1,195 +1,114 @@
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 
 type Props = {
-  imageSrc: string;            // absolute url or relative (we'll handle)
-  caption?: string;            // product name to include in prompts
-  whatsappNumber?: string;     // e.g. "524432189261" (no +)
+  imageSrc: string;         // absolute or vite-resolved URL
+  caption?: string;
+  whatsappNumber?: string;  // e.g., "524432189261"
 };
 
-const isLocal =
-  typeof window !== "undefined" &&
-  (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+export default function PhotoActions({ imageSrc, caption, whatsappNumber = "524432189261" }: Props) {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [tags, setTags] = useState<string[] | null>(null);
 
-/** Convert an image URL into a data URL (works for localhost dev) */
-async function toDataUrl(url: string): Promise<string> {
-  const res = await fetch(url);
-  const blob = await res.blob();
-  const reader = new FileReader();
-  return await new Promise<string>((resolve, reject) => {
-    reader.onerror = reject;
-    reader.onloadend = () => resolve(reader.result as string); // data:image/jpeg;base64,...
-    reader.readAsDataURL(blob);
-  });
-}
-
-/** Make sure image path is absolute for prod (Netlify) */
-function toAbsolute(url: string): string {
-  if (!url) return url;
-  if (/^https?:\/\//i.test(url) || url.startsWith("data:")) return url;
-  const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost";
-  try {
-    return new URL(url, origin).href;
-  } catch {
-    return url;
-  }
-}
-
-/** Scrub weird glyphs that sometimes appear in WhatsApp text */
-function cleanText(s: string) {
-  return (s || "")
-    .trim()
-    .normalize("NFC")
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'")
-    .replace(/\uFFFD/g, "") // replacement char
-    .replace(/\u200B/g, ""); // zero-width space
-}
-
-export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Props) {
-  const [question, setQuestion] = useState<string>("");
-  const [answer, setAnswer] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const [tags, setTags] = useState<string[]>([]);
-  const abs = useMemo(() => toAbsolute(imageSrc), [imageSrc]);
-
-  /** Choose the right payload for the functions (data URL in local dev) */
-  async function imageForAI(): Promise<string> {
-    if (!abs) return "";
-    if (isLocal && !abs.startsWith("data:")) {
-      try {
-        return await toDataUrl(abs);
-      } catch {
-        // If conversion fails, still send the absolute URL; server may handle it
-        return abs;
-      }
-    }
-    return abs;
-  }
-
-  async function askPhoto() {
+  const askPhoto = async () => {
     if (!question.trim()) return;
     setLoading(true);
-    setAnswer("");
+    setAnswer(null);
     try {
-      const payload = {
-        imageUrl: await imageForAI(),
-        question: caption ? `${question.trim()} (Producto: ${caption})` : question.trim(),
-      };
       const r = await fetch("/.netlify/functions/ask-photo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ imageUrl: imageSrc, question }),
       });
-      const j = await r.json();
-      setAnswer(j.answer || "Lo siento, no pude analizar la foto. Intenta de nuevo.");
+      const data = await r.json();
+      setAnswer(data.answer);
     } catch {
       setAnswer("Lo siento, no pude analizar la foto. Intenta de nuevo.");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
-  async function suggestTags() {
-    setTags([]);
+  const getTags = async () => {
+    setLoading(true);
     try {
       const r = await fetch("/.netlify/functions/photo-tags", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ imageUrl: await imageForAI() }),
+        body: JSON.stringify({ imageUrl: imageSrc }),
       });
-      const j = await r.json();
-      const t = Array.from(new Set([...(j.tags || []), ...(j.colors || [])])).slice(0, 8);
-      setTags(t);
+      const data = await r.json();
+      setTags(data.tags || []);
     } catch {
       setTags([]);
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  async function genWhatsApp() {
-    const fallback = cleanText(
-      `¡Hola! Te presentamos nuestros montables para bebé. Perfectos para que tus peques se diviertan a lo grande. Ven y elige tu favorito. ¡Te esperamos!`
-    );
-
-    try {
-      const r = await fetch("/.netlify/functions/make-copy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          context: caption ? `Producto: ${caption}` : "",
-          imageUrl: await imageForAI(),
-        }),
-      });
-      const j = await r.json();
-      const text = cleanText(j.text || fallback);
-      openWhatsApp(text);
-    } catch {
-      openWhatsApp(fallback);
-    }
-  }
-
-  function openWhatsApp(message: string) {
-    const phone = whatsappNumber || "524432189261";
-    const url = `https://api.whatsapp.com/send?phone=${encodeURIComponent(
-      phone
-    )}&text=${encodeURIComponent(message)}`;
+  const genWhatsApp = async () => {
+    const r = await fetch("/.netlify/functions/make-copy", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        context: caption ? `Foto: ${caption}` : "Foto del catálogo",
+        imageUrl: imageSrc,
+      }),
+    });
+    const { text } = await r.json();
+    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
-  }
+  };
 
   return (
-    <div className="mt-4 rounded-2xl border px-4 py-3">
-      <p className="mb-2 text-sm font-semibold text-stone-800">Pregúntale a la foto</p>
-
-      <div className="flex gap-2">
-        <input
-          className="w-full rounded-lg border px-3 py-2 text-sm outline-none ring-1 ring-stone-200 focus:ring-brand-400"
-          placeholder="¿Qué te gustaría saber?"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") askPhoto();
-          }}
-        />
-        <button
-          onClick={askPhoto}
-          disabled={loading || !question.trim()}
-          className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
-        >
-          {loading ? "..." : "Preguntar"}
-        </button>
+    <div className="mt-3 space-y-2">
+      {/* Q&A */}
+      <div className="rounded-xl border p-3 bg-white/60">
+        <label className="text-sm font-medium">Pregúntale a la foto</label>
+        <div className="mt-2 flex gap-2">
+          <input
+            className="flex-1 rounded-lg border px-3 py-2 text-sm"
+            placeholder="¿Este vestido viene en talla 12 m?"
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+          />
+          <button
+            onClick={askPhoto}
+            className="rounded-lg bg-black text-white px-3 py-2 text-sm disabled:opacity-50"
+            disabled={loading}
+          >
+            {loading ? "Analizando..." : "Preguntar"}
+          </button>
+        </div>
+        {answer && <p className="mt-2 text-sm text-gray-700">{answer}</p>}
       </div>
 
-      {answer && (
-        <p className="mt-3 rounded-lg border bg-stone-50 p-3 text-sm text-stone-700">
-          {answer}
-        </p>
-      )}
-
-      <div className="mt-3 flex flex-wrap gap-2">
+      {/* Actions */}
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={genWhatsApp}
-          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-stone-50"
+          className="rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+          title="Genera un mensaje breve para WhatsApp"
         >
           Generar mensaje WhatsApp
         </button>
 
         <button
-          onClick={suggestTags}
-          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-stone-50"
+          onClick={getTags}
+          className="rounded-xl border px-3 py-2 text-sm hover:bg-gray-50"
+          title="Etiquetas sugeridas por IA"
         >
           Sugerir etiquetas
         </button>
       </div>
 
-      {tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-2">
-          <span className="text-sm text-stone-500">Tags:</span>
+      {tags && tags.length > 0 && (
+        <div className="text-xs text-gray-600">
+          <span className="mr-1 font-medium">Tags:</span>
           {tags.map((t) => (
-            <span
-              key={t}
-              className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700"
-            >
-              {t}
-            </span>
+            <span key={t} className="mr-1 rounded bg-gray-100 px-2 py-0.5">{t}</span>
           ))}
         </div>
       )}
