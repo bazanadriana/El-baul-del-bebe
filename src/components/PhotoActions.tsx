@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from "react";
 
 type Props = {
-  imageSrc: string;            // absolute url or relative (we'll handle)
-  caption?: string;            // product name to include in prompts
+  imageSrc: string;            // absolute/relative URL (or data URL)
+  caption?: string;            // product name to add context
   whatsappNumber?: string;     // e.g. "524432189261" (no +)
 };
 
@@ -17,12 +17,12 @@ async function toDataUrl(url: string): Promise<string> {
   const reader = new FileReader();
   return await new Promise<string>((resolve, reject) => {
     reader.onerror = reject;
-    reader.onloadend = () => resolve(reader.result as string); // data:image/jpeg;base64,...
+    reader.onloadend = () => resolve(reader.result as string); // data:image/...;base64,....
     reader.readAsDataURL(blob);
   });
 }
 
-/** Make sure image path is absolute for prod (Netlify) */
+/** Ensure absolute URL in prod */
 function toAbsolute(url: string): string {
   if (!url) return url;
   if (/^https?:\/\//i.test(url) || url.startsWith("data:")) return url;
@@ -34,33 +34,33 @@ function toAbsolute(url: string): string {
   }
 }
 
-/** Scrub weird glyphs that sometimes appear in WhatsApp text */
+/** Scrub weird glyphs in WhatsApp text */
 function cleanText(s: string) {
   return (s || "")
     .trim()
     .normalize("NFC")
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'")
-    .replace(/\uFFFD/g, "") // replacement char
-    .replace(/\u200B/g, ""); // zero-width space
+    .replace(/\uFFFD/g, "")      // replacement char
+    .replace(/\u200B/g, "");     // zero-width space
 }
 
 export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Props) {
-  const [question, setQuestion] = useState<string>("");
+  // Prefill so the button starts enabled
+  const [question, setQuestion] = useState<string>("¿Cuánto cuesta?");
   const [answer, setAnswer] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
   const [tags, setTags] = useState<string[]>([]);
   const abs = useMemo(() => toAbsolute(imageSrc), [imageSrc]);
 
-  /** Choose the right payload for the functions (data URL in local dev) */
+  /** Choose payload for AI (embed bytes on localhost so OpenAI can "see" the image) */
   async function imageForAI(): Promise<string> {
     if (!abs) return "";
     if (isLocal && !abs.startsWith("data:")) {
       try {
         return await toDataUrl(abs);
       } catch {
-        // If conversion fails, still send the absolute URL; server may handle it
-        return abs;
+        return abs; // fallback to URL if conversion fails
       }
     }
     return abs;
@@ -145,13 +145,11 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
           placeholder="¿Qué te gustaría saber?"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") askPhoto();
-          }}
+          onKeyDown={(e) => e.key === "Enter" && askPhoto()}
         />
         <button
           onClick={askPhoto}
-          disabled={loading || !question.trim()}
+          disabled={loading} // only disabled while loading
           className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
         >
           {loading ? "..." : "Preguntar"}
@@ -159,9 +157,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
       </div>
 
       {answer && (
-        <p className="mt-3 rounded-lg border bg-stone-50 p-3 text-sm text-stone-700">
-          {answer}
-        </p>
+        <p className="mt-3 rounded-lg border bg-stone-50 p-3 text-sm text-stone-700">{answer}</p>
       )}
 
       <div className="mt-3 flex flex-wrap gap-2">
