@@ -37,3 +37,6 @@ dist
 # editor
 .vscode/
 .idea/
+
+# env
+.env
