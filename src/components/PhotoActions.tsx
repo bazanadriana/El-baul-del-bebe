@@ -3,14 +3,12 @@ import React, { useMemo, useState } from "react";
 type Props = {
   imageSrc: string;
   caption?: string;
-  whatsappNumber?: string; // e.g. 524432189261
+  whatsappNumber?: string; // e.g. "524432189261"
 };
 
 const isLocal =
   typeof window !== "undefined" &&
   (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-
-// --- helpers -------------------------------------------------------------
 
 async function toDataUrl(url: string): Promise<string> {
   const res = await fetch(url);
@@ -22,18 +20,12 @@ async function toDataUrl(url: string): Promise<string> {
     reader.readAsDataURL(blob);
   });
 }
-
 function toAbsolute(url: string): string {
   if (!url) return url;
   if (/^https?:\/\//i.test(url) || url.startsWith("data:")) return url;
   const origin = typeof window !== "undefined" ? window.location.origin : "http://localhost";
-  try {
-    return new URL(url, origin).href;
-  } catch {
-    return url;
-  }
+  try { return new URL(url, origin).href; } catch { return url; }
 }
-
 function cleanText(s: string) {
   return (s || "")
     .trim()
@@ -43,8 +35,6 @@ function cleanText(s: string) {
     .replace(/\uFFFD/g, "")
     .replace(/\u200B/g, "");
 }
-
-// --- component -----------------------------------------------------------
 
 export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Props) {
   const [question, setQuestion] = useState("¿Cuánto cuesta?");
@@ -59,35 +49,28 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
   async function imageForAI(): Promise<string> {
     if (!abs) return "";
     if (isLocal && !abs.startsWith("data:")) {
-      try {
-        return await toDataUrl(abs);
-      } catch {
-        return abs;
-      }
+      try { return await toDataUrl(abs); } catch { return abs; }
     }
     return abs;
   }
 
   async function askPhoto() {
     if (!question.trim()) return;
-    setLoadingAsk(true);
-    setAnswer("");
-    setError(null);
+    setLoadingAsk(true); setAnswer(""); setError(null);
     try {
-      const payload = {
-        imageUrl: await imageForAI(),
-        question: caption ? `${question.trim()} (Producto: ${caption})` : question.trim(),
-      };
       const r = await fetch("/.netlify/functions/ask-photo", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          imageUrl: await imageForAI(),
+          question: caption ? `${question.trim()} (Producto: ${caption})` : question.trim(),
+        }),
       });
       if (!r.ok) throw new Error(`ask-photo ${r.status}`);
       const j = await r.json();
       setAnswer(j.answer || "Lo siento, no pude analizar la foto.");
-    } catch (e: any) {
-      setError("No se pudo consultar la imagen (¿estás corriendo con `netlify dev`?).");
+    } catch (e) {
+      setError("No se pudo consultar la imagen (¿corriendo con `netlify dev`?).");
       setAnswer("Lo siento, no pude analizar la foto. Intenta de nuevo.");
       console.error(e);
     } finally {
@@ -96,8 +79,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
   }
 
   async function genWhatsApp() {
-    setLoadingCopy(true);
-    setError(null);
+    setLoadingCopy(true); setError(null);
     const fallback = cleanText(
       `¡Hola! Te presentamos nuestros montables para bebé. Perfectos para que tus peques se diviertan a lo grande. Ven y elige tu favorito. ¡Te esperamos!`
     );
@@ -113,7 +95,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
       if (!r.ok) throw new Error(`make-copy ${r.status}`);
       const j = await r.json();
       openWhatsApp(cleanText(j.text || fallback));
-    } catch (e: any) {
+    } catch (e) {
       setError("No se pudo generar el mensaje (revisa funciones/env).");
       console.error(e);
       openWhatsApp(fallback);
@@ -123,9 +105,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
   }
 
   async function suggestTags() {
-    setLoadingTags(true);
-    setTags([]);
-    setError(null);
+    setLoadingTags(true); setTags([]); setError(null);
     try {
       const r = await fetch("/.netlify/functions/photo-tags", {
         method: "POST",
@@ -136,7 +116,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
       const j = await r.json();
       const t = Array.from(new Set([...(j.tags || []), ...(j.colors || [])])).slice(0, 8);
       setTags(t);
-    } catch (e: any) {
+    } catch (e) {
       setError("No se pudieron sugerir etiquetas (revisa funciones/env).");
       console.error(e);
     } finally {
@@ -146,9 +126,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
 
   function openWhatsApp(message: string) {
     const phone = whatsappNumber || "524432189261";
-    const url = `https://api.whatsapp.com/send?phone=${encodeURIComponent(
-      phone
-    )}&text=${encodeURIComponent(message)}`;
+    const url = `https://api.whatsapp.com/send?phone=${encodeURIComponent(phone)}&text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   }
 
@@ -158,7 +136,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
 
       <div className="flex gap-2">
         <input
-          className="w-full rounded-lg border px-3 py-2 text-sm outline-none ring-1 ring-stone-200 focus:ring-brand-400"
+          className="w-full rounded-lg border px-3 py-2 text-sm outline-none ring-1 ring-brand-200 focus:ring-brand-400"
           placeholder="¿Qué te gustaría saber?"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
@@ -167,22 +145,22 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
         <button
           onClick={askPhoto}
           disabled={loadingAsk}
-          className="rounded-lg bg-stone-900 px-4 py-2 text-sm font-semibold text-white disabled:opacity-40"
+          className="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 disabled:opacity-40"
         >
           {loadingAsk ? "..." : "Preguntar"}
         </button>
       </div>
 
       {answer && (
-        <p className="mt-3 rounded-lg border bg-stone-50 p-3 text-sm text-stone-700">{answer}</p>
+        <p className="mt-3 rounded-lg border bg-brand-50 p-3 text-sm text-brand-900">{answer}</p>
       )}
-      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-sm font-medium text-brand-700">{error}</p>}
 
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           onClick={genWhatsApp}
           disabled={loadingCopy}
-          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-stone-50 disabled:opacity-40"
+          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-brand-50 disabled:opacity-40"
         >
           {loadingCopy ? "Generando..." : "Generar mensaje WhatsApp"}
         </button>
@@ -190,7 +168,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
         <button
           onClick={suggestTags}
           disabled={loadingTags}
-          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-stone-50 disabled:opacity-40"
+          className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-brand-50 disabled:opacity-40"
         >
           {loadingTags ? "Analizando..." : "Sugerir etiquetas"}
         </button>
@@ -202,7 +180,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
           {tags.map((t) => (
             <span
               key={t}
-              className="rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700"
+              className="rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800 ring-1 ring-brand-200"
             >
               {t}
             </span>

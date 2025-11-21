@@ -1,33 +1,65 @@
 import type { Handler } from "@netlify/functions";
 import { openai } from "./_openai";
 
+const MODEL = "gpt-4o-mini";
+
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method not allowed" };
+  }
 
   try {
     const { context, imageUrl } = JSON.parse(event.body || "{}") as {
-      context?: string; imageUrl?: string;
+      context?: string;
+      imageUrl?: string;
     };
 
-    const prompt = `Genera un mensaje breve para WhatsApp (<=220 caracteres) en español, amable y claro.
-Sin hashtags. Si hay foto, describe brevemente lo que se ve.`;
+    // ✅ Each item MUST have a role, and content MUST be parts (input_text / input_image)
+    const input = [
+      {
+        role: "system" as const,
+        content: [
+          {
+            type: "input_text" as const,
+            text:
+              "Escribe un texto corto (1–2 frases) para WhatsApp, amistoso y claro, en español neutro, sin emojis raros.",
+          },
+        ],
+      },
+      {
+        role: "user" as const,
+        content: [
+          {
+            type: "input_text" as const,
+            text: context ? `Producto: ${context}` : "Producto de bebé",
+          },
+          ...(imageUrl
+            ? [
+                {
+                  type: "input_image" as const,
+                  image_url: imageUrl,
+                  detail: "low" as const,
+                },
+              ]
+            : []),
+        ],
+      },
+    ];
 
-    const content: any[] = [{ type: "input_text", text: `${prompt}\nContexto: ${context ?? ""}` }];
-    if (imageUrl) content.push({ type: "input_image", image_url: imageUrl, detail: "low" });
-
-    const r = await openai.responses.create({
-      model: "gpt-4o-mini",
-      input: [
-        { role: "system", content: "Eres asistente de venta para tienda infantil." },
-        { role: "user", content },
-      ],
-      max_output_tokens: 140,
+    const res = await openai.responses.create({
+      model: MODEL,
+      input,
+      max_output_tokens: 120,
     });
+
+    const text =
+      (res.output_text || "").trim() ||
+      "Hola, ¿me ayudas con información y precio?";
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: (r.output_text || "").trim() }),
+      body: JSON.stringify({ text }),
     };
   } catch (e) {
     console.error(e);
