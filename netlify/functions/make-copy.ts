@@ -1,49 +1,36 @@
 import type { Handler } from "@netlify/functions";
-import { openai } from "./_openai";
-
-const MODEL = "gpt-4o-mini";
+import { openai, MODEL, withBackoff } from "./_openai";
 
 export const handler: Handler = async (event) => {
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: cors(),
-      body: JSON.stringify({ error: "Method not allowed" }),
-    };
-  }
+  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
 
   try {
-    const { caption } = JSON.parse(event.body || "{}") as { caption?: string };
-    const ai = await openai.responses.create({
-      model: MODEL,
-      input: [
-        {
-          role: "system",
-          content:
-            "Escribe un mensaje corto y amable para WhatsApp (1–2 frases) invitando a pedir precio/disponibilidad.",
-        },
-        { role: "user", content: [{ type: "input_text", text: caption || "Producto" }] },
-      ],
-      max_output_tokens: 120,
-    });
+    const { caption = "", imageUrl } = JSON.parse(event.body || "{}");
 
-    const message =
-      ai.output_text?.trim() ||
-      "¡Hola! Si estás interesado, con gusto te comparto precios y disponibilidad.";
-    return res(200, { message });
-  } catch (e) {
-    console.error("make-copy error", e);
-    return res(500, { error: "make-copy error" });
+    const res = await withBackoff(() =>
+      openai.responses.create({
+        model: MODEL,
+        input: [
+          { role: "system", content: "Escribe un saludo breve para WhatsApp (1–2 oraciones, cordial y natural)." },
+          {
+            role: "user",
+            content: [
+              { type: "input_text", text: `Contexto: ${caption}`.trim() },
+              ...(imageUrl ? [{ type: "input_image" as const, image_url: imageUrl, detail: "low" as const }] : []),
+            ],
+          },
+        ],
+        max_output_tokens: 120,
+      })
+    );
+
+    const text =
+      res.output_text?.trim() ||
+      "¡Hola! Tengo algunas preguntas sobre un artículo que vi en su tienda. ¿Me apoyas con precio y disponibilidad?";
+
+    return { statusCode: 200, headers: { "Content-Type": "application/json" }, body: JSON.stringify({ text }) };
+  } catch (e: any) {
+    const status = e?.statusCode || 500;
+    return { statusCode: status, body: "make-copy error" };
   }
 };
-
-function cors() {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  };
-}
-function res(code: number, body: any) {
-  return { statusCode: code, headers: cors(), body: JSON.stringify(body) };
-}

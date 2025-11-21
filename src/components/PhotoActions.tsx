@@ -8,6 +8,18 @@ type Props = {
   whatsappNumber?: string;
 };
 
+// ---------- simple global gate to avoid API bursts (helps with 429s) ----------
+let nextAllowedAt = 0;
+function gate(cooldownMs = 20_000) {
+  const now = Date.now();
+  if (now < nextAllowedAt) {
+    return { ok: false, waitMs: nextAllowedAt - now };
+  }
+  nextAllowedAt = now + cooldownMs;
+  return { ok: true, waitMs: 0 };
+}
+// -----------------------------------------------------------------------------
+
 // Are we running locally?
 const isLocal =
   typeof window !== "undefined" &&
@@ -84,6 +96,14 @@ export default function PhotoActions({
 
   async function askPhoto() {
     if (!question.trim()) return;
+
+    // rate-limit gate
+    const g = gate();
+    if (!g.ok) {
+      setError(`Espera ${Math.ceil(g.waitMs / 1000)}s y vuelve a intentar.`);
+      return;
+    }
+
     setLoadingAsk(true);
     setAnswer("");
     setError(null);
@@ -113,6 +133,13 @@ export default function PhotoActions({
   }
 
   async function genWhatsApp() {
+    // rate-limit gate
+    const g = gate();
+    if (!g.ok) {
+      setError(`Espera ${Math.ceil(g.waitMs / 1000)}s y vuelve a intentar.`);
+      return;
+    }
+
     setLoadingCopy(true);
     setError(null);
     const fallback = cleanText(
@@ -140,6 +167,13 @@ export default function PhotoActions({
   }
 
   async function suggestTags() {
+    // rate-limit gate
+    const g = gate();
+    if (!g.ok) {
+      setError(`Espera ${Math.ceil(g.waitMs / 1000)}s y vuelve a intentar.`);
+      return;
+    }
+
     setLoadingTags(true);
     setTags([]);
     setError(null);
