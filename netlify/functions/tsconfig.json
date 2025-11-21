@@ -1,8 +1,10 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-      "types": ["node"], 
-      "lib": ["ES2022"]
+      "moduleResolution": "Bundler",
+      "target": "ES2022",
+      "module": "ESNext",
+      "types": ["@netlify/functions"]
     },
     "include": ["./**/*.ts"]
   }

@@ -37,7 +37,7 @@ function cleanText(s: string) {
 }
 
 export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Props) {
-  const [question, setQuestion] = useState("¿Cuánto cuesta?");
+  const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [loadingAsk, setLoadingAsk] = useState(false);
@@ -81,7 +81,7 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
   async function genWhatsApp() {
     setLoadingCopy(true); setError(null);
     const fallback = cleanText(
-      `¡Hola! Te presentamos nuestros montables para bebé. Perfectos para que tus peques se diviertan a lo grande. Ven y elige tu favorito. ¡Te esperamos!`
+      `¡Hola! Tengo algunas preguntas sobre un artículo que vi en la página de tu tienda.`
     );
     try {
       const r = await fetch("/.netlify/functions/make-copy", {

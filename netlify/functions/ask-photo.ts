@@ -1,14 +1,15 @@
 import type { Handler } from "@netlify/functions";
 import { openai, systemPhotoQA } from "./_openai";
-import { corsHeaders, preflight } from "./_cors";
 
 const MODEL = "gpt-4o-mini";
 
 export const handler: Handler = async (event) => {
-  const pf = preflight(event);
-  if (pf) return pf;
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers: corsHeaders, body: "Method not allowed" };
+    return {
+      statusCode: 405,
+      headers: cors(),
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
   }
 
   try {
@@ -16,31 +17,52 @@ export const handler: Handler = async (event) => {
       imageUrl?: string;
       question?: string;
     };
-    if (!imageUrl || !question) {
-      return { statusCode: 400, headers: corsHeaders, body: "Missing imageUrl or question" };
+
+    if (!question) {
+      return res(400, { error: "Missing question" });
     }
 
-    const input = [
-      { role: "system" as const, content: [{ type: "input_text" as const, text: systemPhotoQA }] },
-      {
-        role: "user" as const,
-        content: [
-          { type: "input_text" as const, text: question },
-          { type: "input_image" as const, image_url: imageUrl, detail: "low" as const },
-        ],
-      },
-    ];
+    // If image is not publicly reachable (e.g., localhost), answer without image.
+    const userContent =
+      imageUrl && isProbablyPublic(imageUrl)
+        ? [
+            { type: "input_text" as const, text: question },
+            { type: "input_image" as const, image_url: imageUrl, detail: "low" as const },
+          ]
+        : [{ type: "input_text" as const, text: question }];
 
-    const res = await openai.responses.create({ model: MODEL, input, max_output_tokens: 200 });
-    const answer = (res.output_text || "").trim() || "Lo siento, no pude analizar la foto.";
+    const ai = await openai.responses.create({
+      model: MODEL,
+      input: [
+        { role: "system", content: systemPhotoQA },
+        { role: "user", content: userContent },
+      ],
+      max_output_tokens: 200,
+    });
 
-    return {
-      statusCode: 200,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-      body: JSON.stringify({ answer }),
-    };
-  } catch (e) {
-    console.error(e);
-    return { statusCode: 500, headers: corsHeaders, body: "ask-photo error" };
+    const text = ai.output_text?.trim() || "Lo siento, no pude analizar la foto. Intenta de nuevo.";
+    return res(200, { answer: text });
+  } catch (e: any) {
+    console.error("ask-photo error", e);
+    return res(500, { error: "ask-photo error" });
   }
 };
+
+function cors() {
+  return {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+  };
+}
+function res(code: number, body: any) {
+  return { statusCode: code, headers: cors(), body: JSON.stringify(body) };
+}
+function isProbablyPublic(u: string) {
+  try {
+    const url = new URL(u);
+    return /^https?:$/.test(url.protocol) && !/localhost|127\.0\.0\.1/.test(url.host);
+  } catch {
+    return false;
+  }
+}
