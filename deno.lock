@@ -18,6 +18,7 @@
         "npm:@types/react@^18.3.11",
         "npm:@vitejs/plugin-react@^4.3.1",
         "npm:autoprefixer@^10.4.21",
+        "npm:dotenv@^17.2.3",
         "npm:lucide-react@0.460",
         "npm:netlify-cli@^23.11.1",
         "npm:openai@^6.9.1",

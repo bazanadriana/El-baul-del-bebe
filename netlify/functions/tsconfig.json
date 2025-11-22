@@ -1,11 +1,12 @@
 {
-    "extends": "../../tsconfig.json",
-    "compilerOptions": {
-      "moduleResolution": "Bundler",
-      "target": "ES2022",
-      "module": "ESNext",
-      "types": ["@netlify/functions"]
-    },
-    "include": ["./**/*.ts"]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM"],       // DOM adds fetch typing
+    "types": ["@types/node"],       // 👈 adds process, Buffer, etc.
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
   }
-  
+}
