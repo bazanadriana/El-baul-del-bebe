@@ -1,59 +1,18 @@
 // src/components/PhotoActions.tsx
 import React, { useMemo, useState } from "react";
+import { Sparkles } from "lucide-react";
 
 type Props = {
   imageSrc: string;
   caption?: string;
-  whatsappNumber?: string; // e.g. "524432189261"
+  /** WhatsApp phone, e.g. "524432189261" (digits only) */
+  whatsappNumber?: string;
 };
 
 const isLocal =
   typeof window !== "undefined" &&
   (window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1");
-
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-async function fetchJSON<T>(
-  url: string,
-  body: unknown,
-  opts: { timeout?: number; retries?: number } = {}
-): Promise<T> {
-  const { timeout = 28000, retries = 1 } = opts;
-  let attempt = 0;
-
-  while (true) {
-    const ac = new AbortController();
-    const t = setTimeout(() => ac.abort(), timeout);
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        signal: ac.signal,
-      });
-      clearTimeout(t);
-      if (!res.ok) {
-        if ((res.status === 429 || res.status >= 500) && attempt < retries) {
-          attempt += 1;
-          await sleep(600 * attempt);
-          continue;
-        }
-        const text = await res.text().catch(() => "");
-        throw new Error(`${url} ${res.status} ${text}`);
-      }
-      return (await res.json()) as T;
-    } catch (err: any) {
-      clearTimeout(t);
-      if ((err?.name === "AbortError" || err?.message?.includes("Network")) && attempt < retries) {
-        attempt += 1;
-        await sleep(600 * attempt);
-        continue;
-      }
-      throw err;
-    }
-  }
-}
 
 async function toDataUrl(url: string): Promise<string> {
   const res = await fetch(url);
@@ -88,8 +47,12 @@ function cleanText(s: string) {
     .replace(/\u200B/g, "");
 }
 
+function digitsOnly(phone?: string) {
+  return (phone || "").replace(/\D+/g, "");
+}
+
 export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Props) {
-  const [loadingCopy, setLoadingCopy] = useState(false);
+  const [busy, setBusy] = useState(false);
   const abs = useMemo(() => toAbsolute(imageSrc), [imageSrc]);
 
   async function imageForAI(): Promise<string> {
@@ -104,58 +67,81 @@ export default function PhotoActions({ imageSrc, caption, whatsappNumber }: Prop
     return abs;
   }
 
-  async function genWhatsApp() {
-    setLoadingCopy(true);
+  /** Mobile-safe: navigate immediately using wa.me (no window.open, no async wait) */
+  async function handleClick() {
+    if (busy) return;
+    setBusy(true);
 
+    // fast fallback message (works offline and on mobile)
     const fallback = cleanText(
-      "¡Hola! Tengo algunas preguntas sobre un artículo que vi en la página de tu tienda."
+      `¡Hola! Tengo algunas preguntas sobre el producto${caption ? ` "${caption}"` : ""}.`
     );
 
-    try {
-      const payload = {
-        context: caption ? `Producto: ${caption}` : "",
-        imageUrl: await imageForAI(),
-      };
-      const j = await fetchJSON<{ text?: string }>(
-        "/.netlify/functions/make-copy",
-        payload,
-        { retries: 2 }
-      );
-      openWhatsApp(cleanText(j.text || fallback));
-    } catch (e) {
-      // stay silent in UI; still open WhatsApp with fallback
-      console.warn("make-copy failed; using fallback message", e);
-      openWhatsApp(fallback);
-    } finally {
-      setLoadingCopy(false);
-    }
-  }
+    const phone = digitsOnly(whatsappNumber || "524432189261");
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(fallback)}`;
 
-  function openWhatsApp(message: string) {
-    const phone = whatsappNumber || "524432189261";
-    const url = `https://api.whatsapp.com/send?phone=${encodeURIComponent(
-      phone
-    )}&text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    // Navigate immediately in the same tab (Safari/iOS compatible)
+    window.location.href = url;
+
+    // Optional: if you later want AI text, you could fire-and-forget here:
+    // try {
+    //   const payload = { context: caption ? `Producto: ${caption}` : "", imageUrl: await imageForAI() };
+    //   navigator.sendBeacon?.(
+    //     "/.netlify/functions/make-copy",
+    //     new Blob([JSON.stringify(payload)], { type: "application/json" })
+    //   );
+    // } catch {}
+
+    // We’re navigating away; state change is mostly irrelevant after this line.
+    setBusy(false);
   }
 
   return (
-    <div className="mt-4 rounded-2xl border px-4 py-3">
-      <p className="mb-2 text-sm font-semibold text-stone-800">Contacto por WhatsApp</p>
+    <div
+      className="
+        relative mt-4 rounded-2xl border
+        px-4 py-3
+        bg-gradient-to-br from-white via-white to-brand-50
+        ring-1 ring-brand-200
+        shadow-[0_10px_25px_-10px_rgba(59,130,246,0.35)]
+        before:absolute before:inset-0 before:-z-10 before:rounded-2xl
+        before:bg-[radial-gradient(120px_120px_at_10%_10%,rgba(59,130,246,.25),transparent_60%),radial-gradient(150px_150px_at_90%_20%,rgba(14,165,233,.20),transparent_60%)]
+        after:pointer-events-none after:absolute after:inset-0 after:rounded-2xl
+        after:ring-1 after:ring-inset after:ring-white/60
+      "
+    >
+      <div className="mb-2 flex items-center gap-2">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-brand-600/10">
+          <Sparkles className="h-4 w-4 text-brand-700" />
+        </span>
+        <p className="text-sm font-semibold text-stone-800">
+          Contacto por WhatsApp <span className="ml-1 inline-block rounded bg-brand-600/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-brand-700">AI</span>
+        </p>
+      </div>
 
       {caption && (
-        <p className="mb-3 text-sm text-stone-600">
+        <p className="mb-3 text-sm text-stone-700">
           <span className="font-medium">Producto:</span> {caption}
         </p>
       )}
 
       <button
         type="button"
-        onClick={genWhatsApp}
-        disabled={loadingCopy || !abs}
-        className="rounded-xl border px-3 py-2 text-sm font-medium hover:bg-brand-50 disabled:opacity-40"
+        onClick={handleClick}
+        disabled={busy || !abs}
+        className="
+          relative inline-flex items-center justify-center gap-2
+          rounded-xl border px-3 py-2 text-sm font-semibold
+          text-stone-800 bg-white hover:bg-brand-50
+          ring-1 ring-brand-300 hover:ring-brand-400
+          transition disabled:opacity-40
+          shadow-[inset_0_0_0_1px_rgba(59,130,246,0.25),0_8px_20px_-12px_rgba(14,165,233,0.5)]
+          before:absolute before:inset-[-1px] before:rounded-[12px]
+          before:bg-[conic-gradient(from_180deg_at_50%_50%,rgba(59,130,246,0.35),rgba(14,165,233,0.35),rgba(59,130,246,0.35))]
+          before:opacity-0 hover:before:opacity-100 before:transition-opacity
+        "
       >
-        {loadingCopy ? "Generando..." : "Generar mensaje WhatsApp"}
+        {busy ? "Abriendo..." : "Generar mensaje WhatsApp"}
       </button>
     </div>
   );
