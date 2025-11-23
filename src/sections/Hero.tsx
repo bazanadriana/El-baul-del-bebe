@@ -4,6 +4,9 @@ import { pillAqua } from "../styles/cta";
 import { Star, Book, Phone } from "lucide-react";
 
 import hero1 from "../assets/hero-1.jpg";
+import hero11 from "../assets/hero-11.jpg";
+import hero111 from "../assets/hero-111.jpg";
+import hero1111 from "../assets/hero-1111.jpg";
 import hero2 from "../assets/hero-2.jpg";
 import hero3 from "../assets/hero-3.jpg";
 import hero4 from "../assets/hero-4.jpg";
@@ -14,8 +17,11 @@ type Slide = { src?: string; alt: string; caption?: string; bg?: string };
 
 const slides: Slide[] = [
   { src: hero1, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
-  { src: hero2, alt: "Juguetes educativos", caption: "Accesorios y mas" },
+  { src: hero11, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
+  { src: hero111, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
+  { src: hero1111, alt: "Ropita de bebé", caption: "Ropa suave y sostenible" },
   { src: hero5, alt: "Ropa formal infantil", caption: "Vestidos y trajes para ocasiones especiales" },
+  { src: hero2, alt: "Accesorios y cuidado", caption: "Accesorios y mas" },
   { src: hero6, alt: "Accesorios y cuidado", caption: "Todo para su cuidado" },
   { src: hero3, alt: "Accesorios y cuidado", caption: "Todo para su cuidado" },
   { src: hero4, alt: "Accesorios y cuidado", caption: "Todo para su cuidado" },

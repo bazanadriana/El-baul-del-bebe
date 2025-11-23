@@ -73,6 +73,8 @@ export const products: Product[] = [
     badge: "3+ meses",
     images: [
       { src: a("catalogo/peluches-juguetes/1.jpg"), alt: "Muñecas y figuras" },
+      { src: a("catalogo/peluches-juguetes/5.jpg"), alt: "Peluches y caballito" },
+      { src: a("catalogo/peluches-juguetes/4.jpg"), alt: "Peluches y caballito" },
       { src: a("catalogo/peluches-juguetes/2.jpg"), alt: "Peluches y caballito" },
       { src: a("catalogo/peluches-juguetes/3.jpg"), alt: "Bloques y mesa de construcción" },
     ],
