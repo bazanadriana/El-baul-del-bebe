@@ -1,19 +1,52 @@
-import { Sparkles } from "lucide-react";
+// src/components/common/SectionTitle.tsx
+import React from "react";
+import clsx from "clsx";
+
+type Props = {
+  /** Small line above the title (now can be string or JSX) */
+  kicker?: React.ReactNode;
+  /** Main title (string or JSX) */
+  title: React.ReactNode;
+  /** Optional subtitle (string or JSX) */
+  subtitle?: React.ReactNode;
+  centered?: boolean;
+  className?: string;
+};
 
 export default function SectionTitle({
   kicker,
   title,
   subtitle,
-}: { kicker?: string; title: string; subtitle?: string }) {
+  centered = false,
+  className,
+}: Props) {
   return (
-    <div className="mb-8 text-center">
-      {kicker && (
-        <p className="mb-2 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-brand-700">
-          <Sparkles className="h-4 w-4" /> {kicker}
-        </p>
+    <header
+      className={clsx(
+        "mb-8 md:mb-10",
+        centered ? "text-center" : "text-left",
+        className
       )}
-      <h2 className="text-3xl font-extrabold tracking-tight text-stone-900 sm:text-4xl">{title}</h2>
-      {subtitle && <p className="mx-auto mt-3 max-w-2xl text-stone-600">{subtitle}</p>}
-    </div>
+    >
+      {kicker ? (
+        typeof kicker === "string" ? (
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-700">
+            {kicker}
+          </p>
+        ) : (
+          <div className="mb-2 text-xs font-semibold uppercase tracking-wider text-brand-700">
+            {kicker}
+          </div>
+        )
+      ) : null}
+
+      <h2 className="text-2xl font-bold text-stone-900 sm:text-3xl">{title}</h2>
+
+      {subtitle ? (
+        <p className={clsx("mt-2 text-stone-600", centered && "mx-auto max-w-2xl")}>
+          {subtitle}
+        </p>
+      ) : null}
+    </header>
   );
 }
