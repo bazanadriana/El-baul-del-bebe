@@ -72,9 +72,7 @@ function TileLink({ t }: { t: Tile }) {
         className="group relative grid place-items-center"
         aria-label={`${t.title} (próximamente)`}
       >
-        <div
-          className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20 animate-[pulse_3s_ease_infinite]`}
-        >
+        <div className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20`}>
           <span className={glossy} />
           <TileIcon kind={t.kind} />
         </div>
@@ -90,7 +88,7 @@ function TileLink({ t }: { t: Tile }) {
       className="group relative grid place-items-center"
     >
       <div
-        className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20 hover:ring-2 hover:ring-brand-200 animate-[pulse_3s_ease_infinite]`}
+        className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20 hover:ring-2 hover:ring-brand-200`}
       >
         <span className={glossy} />
         <TileIcon kind={t.kind} />
@@ -121,27 +119,6 @@ export default function Contacto() {
         "
       />
 
-      {/* Soft animated ring — consistent with Hero/Catalogo/Features/Visitanos */}
-      <div
-        aria-hidden
-        className="
-          pointer-events-none absolute inset-0 z-0
-          flex items-center justify-center
-        "
-      >
-        <div
-          className="
-            aspect-square w-[150%] max-w-[1200px]
-            rounded-full
-            border-[2px] border-brand-300/60
-            shadow-[0_0_120px_30px_rgba(59,130,246,0.25)]
-            bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.28),transparent_65%)]
-            opacity-90
-            animate-[spin_40s_linear_infinite]
-          "
-        />
-      </div>
-
       <Container>
         <div className="relative z-10">
           <SectionTitle
@@ -156,10 +133,22 @@ export default function Contacto() {
             centered
           />
 
-          <div className="relative mx-auto grid max-w-3xl grid-cols-2 sm:grid-cols-4 gap-10 sm:gap-12">
-            {tiles.map((t) => (
-              <TileLink key={t.title} t={t} />
-            ))}
+          {/* Shared conic glow behind all contact tiles */}
+          <div className="relative mx-auto mt-8 max-w-3xl">
+            <div
+              aria-hidden
+              className="
+                pointer-events-none absolute -inset-[2px] -z-10 rounded-3xl
+                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.35),rgba(14,165,233,.35),rgba(16,185,129,.30),rgba(59,130,246,.35))]
+                blur-[2px] animate-[spin_10s_linear_infinite]
+              "
+            />
+
+            <div className="grid grid-cols-2 gap-10 sm:grid-cols-4 sm:gap-12">
+              {tiles.map((t) => (
+                <TileLink key={t.title} t={t} />
+              ))}
+            </div>
           </div>
         </div>
       </Container>

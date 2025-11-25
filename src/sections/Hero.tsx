@@ -116,27 +116,6 @@ export default function Hero() {
         "
       />
 
-      {/* Soft animated ring covering the hero background */}
-      <div
-        aria-hidden
-        className="
-          pointer-events-none absolute inset-0 z-0
-          flex items-center justify-center
-        "
-      >
-        <div
-          className="
-            aspect-square w-[180%] max-w-[1400px]
-            rounded-full
-            border-[2px] border-brand-300/60
-            shadow-[0_0_120px_30px_rgba(59,130,246,0.25)]
-            bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.28),transparent_65%)]
-            opacity-90
-            animate-[spin_40s_linear_infinite]
-          "
-        />
-      </div>
-
       <Container>
         {/* NOTE: z-10 so content is above the ring */}
         <div className="relative z-10 grid items-center gap-10 pt-8 pb-16 md:grid-cols-2 md:pt-14 md:pb-24">

@@ -51,26 +51,6 @@ export default function Catalogo() {
         "
       />
 
-      {/* Soft animated ring – same as Hero */}
-      <div
-        aria-hidden
-        className="
-          pointer-events-none absolute inset-0 z-0
-          flex items-center justify-center
-        "
-      >
-        <div
-          className="
-            aspect-square w-[150%] max-w-[1200px]
-            rounded-full
-            border-[2px] border-brand-300/60
-            shadow-[0_0_120px_30px_rgba(59,130,246,0.25)]
-            bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.28),transparent_65%)]
-            opacity-90
-            animate-[spin_40s_linear_infinite]
-          "
-        />
-      </div>
 
       <Container>
         {/* lift content above background animations */}
