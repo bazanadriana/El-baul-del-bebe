@@ -31,6 +31,7 @@ export default function Footer() {
         className="
           pointer-events-none absolute inset-0 -z-10
           [mask-image:radial-gradient(70%_70%_at_50%_0%,black,transparent)]
+          [-webkit-mask-image:radial-gradient(70%_70%_at_50%_0%,black,transparent)]
           before:absolute before:inset-[-25%]
           before:animate-[spin_22s_linear_infinite]
           before:bg-[conic-gradient(from_0deg,rgba(59,130,246,0.10),rgba(14,165,233,0.10),rgba(124,58,237,0.10),rgba(59,130,246,0.10))]
@@ -46,14 +47,14 @@ export default function Footer() {
             className="group relative inline-flex items-center gap-3"
             aria-label="Ir al inicio"
           >
-            {/* animated halo behind logo */}
+            {/* animated halo behind logo — always visible, brighter on hover */}
             <span
               aria-hidden
               className="
                 pointer-events-none absolute -inset-2 -z-10 rounded-3xl
-                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.25),rgba(14,165,233,.25),rgba(124,58,237,.25),rgba(59,130,246,.25))]
-                blur-[6px] opacity-0 group-hover:opacity-100
-                animate-[spin_12s_linear_infinite] transition-opacity
+                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.35),rgba(14,165,233,.35),rgba(124,58,237,.35),rgba(59,130,246,.35))]
+                blur-[10px] opacity-85 group-hover:opacity-100
+                animate-[spin_14s_linear_infinite]
               "
             />
             <img

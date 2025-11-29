@@ -34,12 +34,13 @@ export default function Navbar() {
         supports-[backdrop-filter]:backdrop-blur
       "
     >
-      {/* Animated conic halo background */}
+      {/* Animated conic halo background (desktop + mobile, Safari-safe) */}
       <div
         aria-hidden
         className="
           pointer-events-none absolute inset-0 -z-10
           [mask-image:radial-gradient(70%_70%_at_50%_0%,black,transparent)]
+          [-webkit-mask-image:radial-gradient(70%_70%_at_50%_0%,black,transparent)]
           before:absolute before:inset-[-25%]
           before:animate-[spin_24s_linear_infinite]
           before:bg-[conic-gradient(from_0deg,rgba(59,130,246,0.08),rgba(14,165,233,0.08),rgba(124,58,237,0.08),rgba(59,130,246,0.08))]
@@ -62,13 +63,13 @@ export default function Navbar() {
             className="group relative flex items-center gap-2 font-extrabold tracking-tight"
             aria-label="Ir al inicio"
           >
-            {/* halo behind logo */}
+            {/* halo behind logo — ALWAYS visible (stronger on hover) */}
             <span
               aria-hidden
               className="
                 pointer-events-none absolute -inset-2 -z-10 rounded-2xl
-                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.25),rgba(14,165,233,.25),rgba(124,58,237,.25),rgba(59,130,246,.25))]
-                blur-[6px] opacity-0 group-hover:opacity-100 animate-[spin_14s_linear_infinite]
+                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.35),rgba(14,165,233,.35),rgba(124,58,237,.35),rgba(59,130,246,.35))]
+                blur-[10px] opacity-85 group-hover:opacity-100 animate-[spin_18s_linear_infinite]
               "
             />
             <img
@@ -139,7 +140,7 @@ export default function Navbar() {
         )}
       </Container>
 
-      {/* Sparkles accent */}
+      {/* Sparkles accent (desktop only) */}
       <div
         aria-hidden
         className="
@@ -147,9 +148,6 @@ export default function Navbar() {
         "
       >
         <Sparkles className="h-4 w-4" />
-        <span className="text-xs font-semibold tracking-wide text-brand-700">
-          
-        </span>
       </div>
     </header>
   );

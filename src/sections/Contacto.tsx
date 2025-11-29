@@ -33,49 +33,35 @@ function tileBg(kind: Tile["kind"]) {
 
 function TileIcon({ kind }: { kind: Tile["kind"] }) {
   const iconSize = "h-7 w-7 sm:h-8 sm:w-8";
+
   if (kind === "facebook")
-    return (
-      <FaFacebook
-        className={`${iconSize} text-white drop-shadow-[0_0_6px_rgba(24,119,242,0.5)]`}
-      />
-    );
+    return <FaFacebook className={`${iconSize} text-white`} />;
   if (kind === "instagram")
-    return (
-      <FaInstagram
-        className={`${iconSize} text-white drop-shadow-[0_0_6px_rgba(214,41,118,0.5)]`}
-      />
-    );
+    return <FaInstagram className={`${iconSize} text-white`} />;
   if (kind === "whatsapp")
-    return (
-      <FaWhatsapp
-        className={`${iconSize} text-white drop-shadow-[0_0_6px_rgba(37,211,102,0.5)]`}
-      />
-    );
-  return (
-    <FaEnvelope
-      className={`${iconSize} text-white drop-shadow-[0_0_6px_rgba(30,144,255,0.5)]`}
-    />
-  );
+    return <FaWhatsapp className={`${iconSize} text-white`} />;
+
+  return <FaEnvelope className={`${iconSize} text-white`} />;
 }
 
 function TileLink({ t }: { t: Tile }) {
   const base =
-    "relative grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl transition-all duration-300 shadow-lg hover:scale-110 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)]";
+    "relative grid h-14 w-14 sm:h-16 sm:w-16 place-items-center rounded-2xl transition-all duration-300 shadow-lg hover:scale-110";
 
   const glossy =
     "pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(180deg,rgba(255,255,255,0.55)_0%,rgba(255,255,255,0)_35%)]";
 
+  const Inner = (
+    <div className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20 hover:ring-brand-200`}>
+      <span className={glossy} />
+      <TileIcon kind={t.kind} />
+    </div>
+  );
+
   if (!t.href || t.href === "#") {
     return (
-      <button
-        type="button"
-        className="group relative grid place-items-center"
-        aria-label={`${t.title} (próximamente)`}
-      >
-        <div className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20`}>
-          <span className={glossy} />
-          <TileIcon kind={t.kind} />
-        </div>
+      <button type="button" className="group relative grid place-items-center">
+        {Inner}
       </button>
     );
   }
@@ -87,12 +73,7 @@ function TileLink({ t }: { t: Tile }) {
       rel={t.href.startsWith("http") ? "noopener noreferrer" : undefined}
       className="group relative grid place-items-center"
     >
-      <div
-        className={`${tileBg(t.kind)} ${base} ring-1 ring-white/20 hover:ring-2 hover:ring-brand-200`}
-      >
-        <span className={glossy} />
-        <TileIcon kind={t.kind} />
-      </div>
+      {Inner}
     </a>
   );
 }
@@ -106,7 +87,7 @@ export default function Contacto() {
         bg-gradient-to-b from-white via-white to-brand-50 overflow-hidden
       "
     >
-      {/* AI glow background — unified across all sections */}
+      {/* AI glow background */}
       <div
         aria-hidden
         className="
@@ -144,7 +125,8 @@ export default function Contacto() {
               "
             />
 
-            <div className="grid grid-cols-2 gap-10 sm:grid-cols-4 sm:gap-12">
+            {/* ALWAYS horizontal on all devices */}
+            <div className="grid grid-cols-4 gap-6 sm:gap-12 place-items-center">
               {tiles.map((t) => (
                 <TileLink key={t.title} t={t} />
               ))}

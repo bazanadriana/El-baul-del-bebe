@@ -51,7 +51,6 @@ export default function Catalogo() {
         "
       />
 
-
       <Container>
         {/* lift content above background animations */}
         <div className="relative z-10">
@@ -82,85 +81,99 @@ export default function Catalogo() {
             ))}
           </div>
 
-          {/* Product grid */}
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((product) => {
-              const imgs = (product.images ?? []).map((im) => ({
-                src: toAbs(im.src),
-                alt: im.alt ?? product.name,
-              }));
-              const hasImages = imgs.length > 0;
+          {/* Shared conic glow behind the entire product grid */}
+          <div className="relative">
+            <div
+              aria-hidden
+              className="
+                pointer-events-none absolute -inset-[2px] -z-10 rounded-3xl
+                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.35),rgba(14,165,233,.35),rgba(16,185,129,.30),rgba(59,130,246,.35))]
+                blur-[2px] animate-[spin_10s_linear_infinite]
+              "
+            />
 
-              return (
-                <article
-                  key={product.id}
-                  className="
-                    relative rounded-3xl border border-brand-100/70 bg-white/80 p-4 shadow-lg
-                    hover:shadow-[0_0_25px_rgba(14,165,233,0.3)] transition-all
-                    group
-                  "
-                >
-                  {/* animated AI border */}
-                  <div
-                    className="pointer-events-none absolute -inset-[2px] -z-10 rounded-3xl
-                               bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.25),rgba(14,165,233,.25),rgba(16,185,129,.20),rgba(59,130,246,.25))]
-                               blur-[2px] opacity-0 group-hover:opacity-100 animate-[spin_12s_linear_infinite]"
-                  />
+            {/* Product grid */}
+            <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map((product) => {
+                const imgs = (product.images ?? []).map((im) => ({
+                  src: toAbs(im.src),
+                  alt: im.alt ?? product.name,
+                }));
+                const hasImages = imgs.length > 0;
 
-                  {/* Cover: Carousel or emoji fallback */}
-                  {hasImages ? (
-                    <Carousel
-                      images={imgs}
-                      className="mb-3"
-                      aspectClass="aspect-[4/3]"
-                      radiusClass="rounded-xl"
-                      showDots
-                      showArrows
+                return (
+                  <article
+                    key={product.id}
+                    className="
+                      relative rounded-3xl border border-brand-100/70 bg-white/80 p-4 shadow-lg
+                      hover:shadow-[0_0_25px_rgba(14,165,233,0.3)] transition-all
+                      group
+                    "
+                  >
+                    {/* animated AI border – always visible (stronger on hover) */}
+                    <div
+                      className="
+                        pointer-events-none absolute -inset-[2px] -z-10 rounded-3xl
+                        bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.25),rgba(14,165,233,.25),rgba(16,185,129,.20),rgba(59,130,246,.25))]
+                        blur-[2px] opacity-70 group-hover:opacity-100 animate-[spin_12s_linear_infinite]
+                      "
                     />
-                  ) : (
-                    <div className="mb-3 grid aspect-[4/3] w-full place-items-center rounded-xl bg-gradient-to-br from-brand-100 to-stone-100 text-5xl">
-                      <span aria-hidden>{product.emoji ?? "🧸"}</span>
-                    </div>
-                  )}
 
-                  {/* Body */}
-                  <div className="flex items-start gap-4">
-                    <div className="w-full">
-                      <h3 className="text-lg font-semibold text-stone-900">
-                        {product.name}
-                      </h3>
-                      <p className="mt-1 text-sm text-stone-600">
-                        {product.description}
-                      </p>
-
-                      {product.badge && (
-                        <div className="mt-2">
-                          <Badge>{product.badge}</Badge>
-                        </div>
-                      )}
-
-                      <div className="mt-4">
-                        <a
-                          href="#contacto"
-                          className="text-sm font-semibold text-brand-700 underline-offset-4 hover:underline"
-                        >
-                          Pide información
-                        </a>
+                    {/* Cover: Carousel or emoji fallback */}
+                    {hasImages ? (
+                      <Carousel
+                        images={imgs}
+                        className="mb-3"
+                        aspectClass="aspect-[4/3]"
+                        radiusClass="rounded-xl"
+                        showDots
+                        showArrows
+                      />
+                    ) : (
+                      <div className="mb-3 grid aspect-[4/3] w-full place-items-center rounded-xl bg-gradient-to-br from-brand-100 to-stone-100 text-5xl">
+                        <span aria-hidden>{product.emoji ?? "🧸"}</span>
                       </div>
+                    )}
 
-                      {/* WhatsApp only */}
-                      {hasImages && (
-                        <PhotoActions
-                          imageSrc={imgs[0].src}
-                          caption={product.name}
-                          whatsappNumber="524432189261"
-                        />
-                      )}
+                    {/* Body */}
+                    <div className="flex items-start gap-4">
+                      <div className="w-full">
+                        <h3 className="text-lg font-semibold text-stone-900">
+                          {product.name}
+                        </h3>
+                        <p className="mt-1 text-sm text-stone-600">
+                          {product.description}
+                        </p>
+
+                        {product.badge && (
+                          <div className="mt-2">
+                            <Badge>{product.badge}</Badge>
+                          </div>
+                        )}
+
+                        <div className="mt-4">
+                          <a
+                            href="#contacto"
+                            className="text-sm font-semibold text-brand-700 underline-offset-4 hover:underline"
+                          >
+                            Pide información
+                          </a>
+                        </div>
+
+                        {/* WhatsApp only */}
+                        {hasImages && (
+                          <PhotoActions
+                            imageSrc={imgs[0].src}
+                            caption={product.name}
+                            whatsappNumber="524432189261"
+                          />
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </article>
-              );
-            })}
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </div>
       </Container>

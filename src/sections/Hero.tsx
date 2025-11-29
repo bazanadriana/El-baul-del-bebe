@@ -117,7 +117,7 @@ export default function Hero() {
       />
 
       <Container>
-        {/* NOTE: z-10 so content is above the ring */}
+        {/* content above the glow */}
         <div className="relative z-10 grid items-center gap-10 pt-8 pb-16 md:grid-cols-2 md:pt-14 md:pb-24">
           {/* Left column */}
           <div>
@@ -168,10 +168,13 @@ export default function Hero() {
           <div className="relative">
             {/* animated conic border */}
             <div
-              className="pointer-events-none absolute -inset-[2px] -z-10 rounded-3xl
-                            bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.35),rgba(14,165,233,.35),rgba(16,185,129,.30),rgba(59,130,246,.35))]
-                            blur-[2px] animate-[spin_10s_linear_infinite]"
+              className="
+                pointer-events-none absolute -inset-[2px] -z-10 rounded-3xl
+                bg-[conic-gradient(at_50%_50%,rgba(59,130,246,.35),rgba(14,165,233,.35),rgba(16,185,129,.30),rgba(59,130,246,.35))]
+                blur-[2px] animate-[spin_10s_linear_infinite]
+              "
             />
+
             <div
               ref={viewportRef}
               onScroll={onScroll}
@@ -187,26 +190,31 @@ export default function Hero() {
                 {slides.map((s, i) => (
                   <figure
                     key={i}
-                    className="relative min-w-full snap-start"
+                    className="
+                      relative min-w-full snap-start
+                      h-72 md:h-96 overflow-hidden
+                      bg-gradient-to-br from-brand-50 via-sky-50 to-emerald-50
+                    "
                     aria-label={`${i + 1} de ${slides.length}`}
                   >
                     {s.src ? (
                       <img
                         src={s.src}
                         alt={s.alt}
-                        className="h-72 w-full object-cover md:h-96"
+                        className="absolute inset-0 h-full w-full object-cover"
                         draggable={false}
                         loading={i === 0 ? "eager" : "lazy"}
                         decoding="async"
                       />
                     ) : (
                       <div
-                        className={`h-72 w-full md:h-96 bg-gradient-to-br ${
+                        className={`absolute inset-0 h-full w-full bg-gradient-to-br ${
                           s.bg ??
                           "from-brand-300 via-brand-500 to-emerald-400"
                         }`}
                       />
                     )}
+
                     {s.caption && (
                       <figcaption className="absolute bottom-3 left-3 rounded-lg bg-black/40 px-3 py-1 text-sm font-semibold text-white backdrop-blur">
                         {s.caption}

@@ -1,15 +1,17 @@
+// src/components/common/Carousel.tsx
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import clsx from "clsx";
 
 type Img = { src: string; alt?: string };
+
 type Props = {
   images: Img[];
   /** Tailwind className for wrapper */
   className?: string;
   /** Aspect ratio for the media box */
   aspectClass?: string; // e.g., "aspect-[4/3]"
-  /** Rounded corners class for the <img> */
+  /** Rounded corners class for the visual box */
   radiusClass?: string; // e.g., "rounded-xl"
   /** If true, show small dot indicators */
   showDots?: boolean;
@@ -74,20 +76,36 @@ export default function Carousel({
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
     >
-      <div className={clsx("w-full overflow-hidden", aspectClass)}>
+      {/* viewport */}
+      <div className="w-full overflow-hidden">
         <div
           className="flex h-full w-full transition-transform duration-300 ease-out"
           style={{ transform: `translateX(-${i * 100}%)` }}
         >
           {images.map((img, idx) => (
-            <div key={idx} className="relative h-full w-full shrink-0">
-              <img
-                src={img.src}
-                alt={img.alt ?? `Imagen ${idx + 1}`}
-                className={clsx("h-full w-full object-cover", radiusClass)}
-                loading={idx === 0 ? "eager" : "lazy"}
-                draggable={false}
-              />
+            <div key={idx} className="w-full shrink-0">
+              {/* gradient placeholder + aspect ratio box */}
+              <div
+                className={clsx(
+                  "relative w-full overflow-hidden",
+                  aspectClass,
+                  radiusClass,
+                  // soft placeholder so it never looks empty
+                  "bg-gradient-to-br from-brand-50 via-sky-50 to-emerald-50"
+                )}
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt ?? `Imagen ${idx + 1}`}
+                  className={clsx(
+                    "absolute inset-0 h-full w-full object-cover",
+                    radiusClass
+                  )}
+                  loading={idx === 0 ? "eager" : "lazy"}
+                  decoding="async"
+                  draggable={false}
+                />
+              </div>
             </div>
           ))}
         </div>
